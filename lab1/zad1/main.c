@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 char **table = NULL;
 unsigned int initializated = 0;
 unsigned int table_size = 0;
@@ -99,18 +100,89 @@ void delete_array()
     free(table);
 }
 
+int get_operations_count(int idx)
+{
+    char *content = get_block(idx);
+    char *p;
+    int counter = 0;
+    p = content;
+    while (*p != '\0')
+    {
+        if (*p == '\n' && (*(++p) > '0' && *(p) < '9'))
+            counter++;
+        p++;
+    }
+
+    return counter + 1;
+}
+
+void delete_operation_from_block(int block_idx, int operation_idx)
+{
+    char **content = &table[block_idx];
+
+    char *p = *content;
+    size_t len = 0;
+    int counter = 0;
+    int exist = 0;
+    char *first = NULL;
+    int line_count = 0;
+    int old_counter = 0;
+    while (*p != '\0')
+    {
+
+        if (*p == '\n' && (*(++p) > '0' && *(p) < '9'))
+            counter++;
+        if (counter == operation_idx)
+        {
+
+            if (exist == 0)
+            {
+                exist = 1;
+                first = p;
+                first;
+            }
+
+            len++;
+            old_counter = counter;
+        }
+
+        p++;
+        if (old_counter == counter)
+        {
+            if (*p == '\n')
+            {
+                len++;
+            }
+        }
+        old_counter = -1;
+    }
+    if (counter + 1 <= operation_idx)
+    {
+        fprintf(stderr, "Index doesn't exist");
+        return;
+    }
+
+    // printf("\n\n%ld\n\n", len);
+
+    // char *q = *content;
+    // size_t size = 0;
+    // while ((p = strstr(p, sub)) != NULL)
+    // {
+    //     size = (size == 0) ? (p - str) + strlen(p + len) + 1 : size - len;
+    // printf("ala: \n\n%s\n\n\n\n x::::", first + len);
+    memmove(first, first + len, p - first + len);
+    // }
+}
+
 int main()
 {
-    // init_table(10);
-    // FILE *f = NULL;
-    // f = fopen("main.c", "r");
-    // int a = get_file_size(f);
-    // fclose(f);
-    // printf("%d\n", a);
-    // diff_files("a.txt", "b.txt");
+
     init_table(10);
     diff_files("a.txt", "b.txt");
     tmp_to_array();
+
+    // get_operations_count(0);
+    delete_operation_from_block(0, 2);
     for (int i = 0; i < 10; ++i)
     {
         int idx = i;
@@ -118,6 +190,5 @@ int main()
         printf("block: %s\n", get_block(idx));
         delete_block(idx);
     }
-
     return 0;
 }
