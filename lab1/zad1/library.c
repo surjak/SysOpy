@@ -6,7 +6,7 @@ unsigned int initializated = 0;
 unsigned int table_size = 0;
 char *tmp_file = NULL;
 char *pair_sequence = NULL;
-// 1.
+
 int init_table(unsigned int size)
 {
     if (initializated == 1)
@@ -21,7 +21,7 @@ int init_table(unsigned int size)
     tmp_file = "tmp.txt";
     return 0;
 }
-// 3.
+
 int diff_files(char *file1, char *file2)
 {
     char buf[256];
@@ -74,7 +74,7 @@ int file_to_array(char *file_name)
     fprintf(stderr, "can't load into array, array is full\n");
     return -1;
 }
-// 4.
+
 int tmp_to_array()
 {
     return file_to_array(tmp_file);
@@ -84,7 +84,7 @@ char *get_block(int idx)
 {
     return table[idx];
 }
-// 6.
+
 int delete_block(int idx)
 {
     free(table[idx]);
@@ -100,7 +100,7 @@ void delete_array()
     }
     free(table);
 }
-// 5.
+
 int get_operations_count(int idx)
 {
     char *content = get_block(idx);
@@ -117,7 +117,6 @@ int get_operations_count(int idx)
     return counter + 1;
 }
 
-// 7.
 void delete_operation_from_block(int block_idx, int operation_idx)
 {
     char **content = &table[block_idx];
@@ -200,27 +199,4 @@ void diff_all_elements_from_sequence_and_save_to_array()
         diff_files(f1, f2);
         tmp_to_array();
     }
-}
-
-int main()
-{
-
-    init_table(10);
-
-    define_pair_sequence("a.txt b.txt c.txt d.txt e.txt f.txt");
-    diff_all_elements_from_sequence_and_save_to_array();
-
-    delete_operation_from_block(0, 0);
-    delete_operation_from_block(1, 0);
-    delete_operation_from_block(2, 0);
-    diff_all_elements_from_sequence_and_save_to_array();
-
-    for (int i = 0; i < 10; ++i)
-    {
-        int idx = i;
-        printf("idx: %d\n", idx);
-        printf("block: %s\n\n", get_block(idx));
-        delete_block(idx);
-    }
-    return 0;
 }
