@@ -117,15 +117,6 @@ int get_operations_count(int idx)
     return counter + 1;
 }
 
-char *concat(const char *s1, const char *s2)
-{
-    char *result = calloc(strlen(s1) + strlen(s2) + 1, sizeof(char)); // +1 for the null-terminator
-    // in real code you would check for errors in malloc here
-    strcpy(result, s1);
-    strcat(result, s2);
-    return result;
-}
-
 // 7.
 void delete_operation_from_block(int block_idx, int operation_idx)
 {
@@ -215,31 +206,15 @@ int main()
 {
 
     init_table(10);
-    // diff_files("c.txt", "d.txt");
-    // tmp_to_array();
 
-    // // get_operations_count(0);
-    // delete_operation_from_block(0, 1);
-
-    // delete_operation_from_block(0, 1);
-
-    // diff_files("c.txt", "d.txt");
-    // tmp_to_array();
-    define_pair_sequence("a.txt b.txt c.txt d.txt");
+    define_pair_sequence("a.txt b.txt c.txt d.txt e.txt f.txt");
     diff_all_elements_from_sequence_and_save_to_array();
-    // printf("%d", get_operations_count(1));
-    delete_operation_from_block(0, 0);
-    // delete_operation_from_block(1, 1);
-    // printf("%d", get_operations_count(0));
-    // for (int i = 0; i < 10; ++i)
-    // {
-    //     int idx = i;
-    //     printf("idx: %d\n", idx);
-    //     printf("block: %s\n", get_block(idx));
-    //     delete_block(idx);
-    // }
 
-    // delete_operation_from_block(1, 1);
+    delete_operation_from_block(0, 0);
+    delete_operation_from_block(1, 0);
+    delete_operation_from_block(2, 0);
+    diff_all_elements_from_sequence_and_save_to_array();
+
     for (int i = 0; i < 10; ++i)
     {
         int idx = i;
