@@ -5,6 +5,7 @@ char **table = NULL;
 unsigned int initializated = 0;
 unsigned int table_size = 0;
 char *tmp_file = NULL;
+char *pair_sequence = NULL;
 // 1.
 int init_table(unsigned int size)
 {
@@ -115,6 +116,16 @@ int get_operations_count(int idx)
 
     return counter + 1;
 }
+
+char *concat(const char *s1, const char *s2)
+{
+    char *result = calloc(strlen(s1) + strlen(s2) + 1, sizeof(char)); // +1 for the null-terminator
+    // in real code you would check for errors in malloc here
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
+}
+
 // 7.
 void delete_operation_from_block(int block_idx, int operation_idx)
 {
@@ -127,11 +138,17 @@ void delete_operation_from_block(int block_idx, int operation_idx)
     char *first = NULL;
     int line_count = 0;
     int old_counter = 0;
+    int chars = 0;
+
     while (*p != '\0')
     {
+        chars++;
 
         if (*p == '\n' && (*(++p) > '0' && *(p) < '9'))
+        {
             counter++;
+        }
+
         if (counter == operation_idx)
         {
 
@@ -162,23 +179,72 @@ void delete_operation_from_block(int block_idx, int operation_idx)
         return;
     }
 
-    memmove(first, first + len, p - first + len);
+    char *new = calloc(strlen(*content) + 1, sizeof(char));
+    memcpy(new, *content, first - *content);
+    char *pointer = new;
+    while (*pointer != '\0')
+    {
+        pointer++;
+    }
+    memcpy(pointer, first + len, strlen(first + len));
+    delete_block(block_idx);
+    table[block_idx] = new;
+}
+void define_pair_sequence(char *sequence)
+{
+
+    pair_sequence = sequence;
+}
+void diff_all_elements_from_sequence_and_save_to_array()
+{
+    char *string = strdup(pair_sequence);
+    char *token = strtok(string, " ");
+    while (token != NULL)
+    {
+
+        char *f1 = token;
+        token = strtok(NULL, " ");
+        char *f2 = token;
+        token = strtok(NULL, " ");
+        diff_files(f1, f2);
+        tmp_to_array();
+    }
 }
 
 int main()
 {
 
     init_table(10);
-    diff_files("a.txt", "b.txt");
-    tmp_to_array();
+    // diff_files("c.txt", "d.txt");
+    // tmp_to_array();
 
-    get_operations_count(0);
-    // delete_operation_from_block(0, 2);
+    // // get_operations_count(0);
+    // delete_operation_from_block(0, 1);
+
+    // delete_operation_from_block(0, 1);
+
+    // diff_files("c.txt", "d.txt");
+    // tmp_to_array();
+    define_pair_sequence("a.txt b.txt c.txt d.txt");
+    diff_all_elements_from_sequence_and_save_to_array();
+    // printf("%d", get_operations_count(1));
+    delete_operation_from_block(0, 0);
+    // delete_operation_from_block(1, 1);
+    // printf("%d", get_operations_count(0));
+    // for (int i = 0; i < 10; ++i)
+    // {
+    //     int idx = i;
+    //     printf("idx: %d\n", idx);
+    //     printf("block: %s\n", get_block(idx));
+    //     delete_block(idx);
+    // }
+
+    // delete_operation_from_block(1, 1);
     for (int i = 0; i < 10; ++i)
     {
         int idx = i;
         printf("idx: %d\n", idx);
-        printf("block: %s\n", get_block(idx));
+        printf("block: %s\n\n", get_block(idx));
         delete_block(idx);
     }
     return 0;
