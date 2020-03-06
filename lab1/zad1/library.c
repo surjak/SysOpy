@@ -103,22 +103,41 @@ void delete_array()
 
 int get_operations_count(int idx)
 {
+    if (table[idx] == NULL)
+    {
+        fprintf(stderr, "table on this index is empty");
+        return 0;
+    }
     char *content = get_block(idx);
     char *p;
     int counter = 0;
     p = content;
+    int flag = 0;
+
     while (*p != '\0')
     {
+        flag = 1;
         if (*p == '\n' && (*(++p) > '0' && *(p) < '9'))
             counter++;
         p++;
     }
-
-    return counter + 1;
+    int val_to_ret = 0;
+    if (flag == 1)
+        val_to_ret = counter + 1;
+    return val_to_ret;
 }
 
 void delete_operation_from_block(int block_idx, int operation_idx)
 {
+    if (table[block_idx] == NULL)
+    {
+        fprintf(stderr, "table on this index is empty");
+        return;
+    }
+    if (get_operations_count(block_idx) == 0)
+    {
+        return;
+    }
     char **content = &table[block_idx];
 
     char *p = *content;
@@ -168,6 +187,13 @@ void delete_operation_from_block(int block_idx, int operation_idx)
         return;
     }
 
+    if (get_operations_count(block_idx) == 1)
+    {
+
+        free(table[block_idx]);
+        return;
+    }
+
     char *new = calloc(strlen(*content) + 1, sizeof(char));
     memcpy(new, *content, first - *content);
     char *pointer = new;
@@ -178,6 +204,11 @@ void delete_operation_from_block(int block_idx, int operation_idx)
     memcpy(pointer, first + len, strlen(first + len));
     delete_block(block_idx);
     table[block_idx] = new;
+
+    if (get_operations_count(block_idx) == 0)
+    {
+        free(table[block_idx]);
+    }
 }
 void define_pair_sequence(char *sequence)
 {
@@ -186,7 +217,7 @@ void define_pair_sequence(char *sequence)
 }
 void diff_all_elements_from_sequence_and_save_to_array()
 {
-    // char *string = strdup(pair_sequence);
+
     char *string = strdup(pair_sequence);
 
     char *token = strtok(string, " ");
