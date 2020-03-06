@@ -1,0 +1,18 @@
+start create_table 100 end "table create 100"
+start search_directory . "*." tmp.txt end "small search"
+start load_to_array end "small load to array"
+start remove_block 0 end "small remove from array"
+start search_directory ~/ "*." tmp.txt end "medium search"
+start load_to_array end "medium load to array"
+start remove_block 0 end "medium remove from array"
+start search_directory / "*." tmp.txt end "big search"
+start load_to_array end "big load to array"
+start remove_block 0 end "big remove from array"
+start load_to_array remove_block 0
+load_to_array remove_block 0
+load_to_array remove_block 0
+load_to_array remove_block 0
+load_to_array remove_block 0
+load_to_array remove_block 0
+load_to_array remove_block 0
+end "add remove 7 times"

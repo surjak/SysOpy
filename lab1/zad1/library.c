@@ -7,7 +7,7 @@ unsigned int table_size = 0;
 char *tmp_file = NULL;
 char *pair_sequence = NULL;
 
-int init_table(unsigned int size)
+int create_table(unsigned int size)
 {
     if (initializated == 1)
     {
@@ -127,7 +127,7 @@ int get_operations_count(int idx)
     return val_to_ret;
 }
 
-void delete_operation_from_block(int block_idx, int operation_idx)
+void remove_operation(int block_idx, int operation_idx)
 {
     if (table[block_idx] == NULL)
     {
@@ -218,7 +218,7 @@ void define_pair_sequence(char *sequence)
 
     pair_sequence = sequence;
 }
-void diff_all_elements_from_sequence_and_save_to_array()
+void compare_pairs()
 {
 
     char *string = strdup(pair_sequence);
