@@ -1,4 +1,9 @@
+#ifdef DYNAMIC
+#include "diff_dynamic.h"
+#else
 #include "library.h"
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -108,6 +113,9 @@ int parse_remove_operation(char *argv[], int i, int argc)
 
 int main(int argc, char *argv[])
 {
+#ifdef DYNAMIC
+    init_dynamic_library();
+#endif
 
     char file_name[] = "raport.txt";
     report_file = fopen(file_name, "a");
