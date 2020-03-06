@@ -1,0 +1,6 @@
+*.a
+*.so
+zad2/*.txt
+!zad2/args.txt
+!zad2/raport2.txt
+main
