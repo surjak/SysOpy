@@ -6,3 +6,7 @@ zad1/*.txt
 !zad2/args.txt
 !zad2/raport2.txt
 main
+!zad3a/args.txt
+!zad3a/raport3a.txt
+!zad3b/args.txt
+!zad3b/raport3b.txt

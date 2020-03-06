@@ -1,0 +1,54 @@
+start create_table 100 end "table create 100"
+start compare_pairs "a.txt b.txt c.txt d.txt e.txt f.txt g.txt h.txt" end "small diff"
+start remove_block 0 end "small remove from array"
+start remove_operation 2 0 end "small remove operation from array"
+start compare_pairs "a.txt b.txt c.txt d.txt e.txt f.txt g.txt h.txt big.txt big2.txt" end "medium diff"
+start remove_operation 6 0 end "medium remove operation from array"
+start remove_block 6 end "medium remove from array"
+start compare_pairs "a.txt b.txt c.txt d.txt e.txt f.txt g.txt h.txt big.txt big2.txt  f.txt
+ h.txt
+ c.txt
+ d.txt
+ e.txt
+ big2.txt
+a.txt 
+b.txt
+ big.txt
+ g.txt  h.txt
+ f.txt
+ big2.txt
+ e.txt
+ g.txt
+ c.txt
+b.txt
+ d.txt
+a.txt 
+ big.txt d.txt
+ h.txt
+ e.txt
+ big.txt
+a.txt 
+ big2.txt
+b.txt
+ c.txt
+ g.txt
+ f.txt a.txt 
+ d.txt
+ h.txt
+ big2.txt
+ e.txt
+ f.txt
+ g.txt
+ big.txt
+ c.txt
+b.txt big.txt big2.txt" end "big diff"
+start remove_operation 42 0 end "big remove operation from array"
+start remove_block 50 end "big remove from array"
+start tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+end "add remove 7 times"
