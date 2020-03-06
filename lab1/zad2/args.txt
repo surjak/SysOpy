@@ -41,6 +41,14 @@ b.txt
  g.txt
  big.txt
  c.txt
-b.txt" end "big diff"
+b.txt big.txt big2.txt" end "big diff"
 start remove_operation 42 0 end "big remove operation from array"
 start remove_block 50 end "big remove from array"
+start tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+end "add remove 7 times"

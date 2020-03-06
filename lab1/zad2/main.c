@@ -159,6 +159,13 @@ int main(int argc, char *argv[])
             }
             i += 2;
         }
+        else if (!strcmp(argv[i], "tmp_to_array"))
+        {
+            tmp_to_array();
+            i++;
+            parse_remove_block(argv, i, argc);
+            i += 2;
+        }
         else if (!strcmp(argv[i], "start"))
         {
             start_timer();
