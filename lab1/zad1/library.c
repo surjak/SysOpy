@@ -126,7 +126,7 @@ void delete_operation_from_block(int block_idx, int operation_idx)
     int counter = 0;
     int exist = 0;
     char *first = NULL;
-    int line_count = 0;
+
     int old_counter = 0;
     int chars = 0;
 
@@ -146,7 +146,6 @@ void delete_operation_from_block(int block_idx, int operation_idx)
             {
                 exist = 1;
                 first = p;
-                first;
             }
 
             len++;
@@ -187,7 +186,9 @@ void define_pair_sequence(char *sequence)
 }
 void diff_all_elements_from_sequence_and_save_to_array()
 {
+    // char *string = strdup(pair_sequence);
     char *string = strdup(pair_sequence);
+
     char *token = strtok(string, " ");
     while (token != NULL)
     {

@@ -10,5 +10,6 @@ int tmp_to_array();
 int delete_block(int idx);
 void delete_array();
 void delete_operation_from_block(int block_idx, int operation_idx);
+char *get_block(int idx);
 
 #endif //LAB1_LIBRARY_H
