@@ -191,6 +191,8 @@ void delete_operation_from_block(int block_idx, int operation_idx)
     {
 
         free(table[block_idx]);
+        delete_block(block_idx);
+
         return;
     }
 
@@ -208,6 +210,7 @@ void delete_operation_from_block(int block_idx, int operation_idx)
     if (get_operations_count(block_idx) == 0)
     {
         free(table[block_idx]);
+        delete_block(block_idx);
     }
 }
 void define_pair_sequence(char *sequence)
