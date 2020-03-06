@@ -183,13 +183,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    for (int i = 0; i < 10; ++i)
-    {
-        int idx = i;
-        printf("idx: %d\n", idx);
-        printf("block: %s\n\n", get_block(idx));
-        delete_block(idx);
-    }
     delete_array();
 
     return 0;
