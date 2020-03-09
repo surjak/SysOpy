@@ -152,31 +152,45 @@ void compare_pair(char *pair)
 {
     char *string = strdup(pair);
 
-    char *token = strtok(string, ":");
+    char *f1 = strtok(string, ":");
+    char *f2 = strtok(NULL, "");
 
-    while (token != NULL)
-    {
-        char *f1 = token;
-        token = strtok(NULL, "");
-        char *f2 = token;
-        token = strtok(NULL, "");
-        diff_files(f1, f2);
-        tmp_to_array();
-    }
+    // printf("%s\n", f1);
+    // printf("%s\n", f2);
+
+    diff_files(f1, f2);
+    tmp_to_array();
 }
 
 void compare_pairs()
 {
+
     char *string = strdup(files_sequence);
 
     char *token = strtok(string, " ");
-
+    int count = 0;
     while (token != NULL)
     {
         char *f1 = token;
         token = strtok(NULL, " ");
+        count++;
+    }
 
-        compare_pair(f1);
+    char *pairs[count];
+    int i = 0;
+    char *string_2 = strdup(files_sequence);
+
+    char *token_2 = strtok(string_2, " ");
+    while (token_2 != NULL)
+    {
+        pairs[i] = token_2;
+        i++;
+        token_2 = strtok(NULL, " ");
+    }
+
+    for (int j = 0; j < count; j++)
+    {
+        compare_pair(pairs[j]);
     }
 }
 
@@ -235,31 +249,31 @@ void delete_array()
     free(diff_handler);
 }
 
-// int main()
-// {
-//     define_pair_sequence("txt/a.txt:txt/b.txt txt/c.txt:txt/d.txt");
-//     create_table(20);
-//     compare_pairs();
-//     // tmp_to_array();
+int main()
+{
+    define_pair_sequence("txt/a.txt:txt/b.txt txt/c.txt:txt/d.txt txt/a.txt:txt/c.txt");
+    create_table(20);
+    compare_pairs();
+    // tmp_to_array();
 
-//     // printf("%s", diff_handler->block_array[0]->operations[2]->content);
-//     delete_block(0);
-//     // printf("%s", diff_handler->block_array[0]->operations[0]->content);
-//     compare_pairs();
+    // printf("%s", diff_handler->block_array[0]->operations[2]->content);
+    // delete_block(0);
+    // printf("%s", diff_handler->block_array[2]->operations[0]->content);
+    // compare_pairs();
 
-//     remove_opearation(0, 1);
-//     remove_opearation(0, 0);
-//     remove_opearation(0, 2);
-//     remove_opearation(0, 3);
-//     compare_pairs();
-//     printf("%d\n", get_operations_count(0));
+    // remove_opearation(0, 1);
+    // remove_opearation(0, 0);
+    // remove_opearation(0, 2);
+    // remove_opearation(0, 3);
+    // compare_pairs();
+    // printf("%d\n", get_operations_count(0));
 
-//     Operations *ope = get_block(0);
-//     for (int i = 0; i < ope->count; i++)
-//     {
-//         printf("%d: \n%s\n\n", i, ope->operations[i]->content);
-//     }
+    Operations *ope = get_block(2);
+    for (int i = 0; i < ope->count; i++)
+    {
+        printf("%d: \n%s\n\n", i, ope->operations[i]->content);
+    }
 
-//     printf("\n\n\n\n\n%s\n\n", get_operation(0, 1));
-//     delete_array();
-// }
+    // printf("\n\n\n\n\n%s\n\n", get_operation(0, 1));
+    delete_array();
+}
