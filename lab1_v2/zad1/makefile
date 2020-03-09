@@ -10,7 +10,7 @@ static:
 	make clean
 
 shared:
-	$(CC) -fPIC $(FLAGS) -c library.c -o $(LIB_NAME).o
+	$(CC) -fPIC $(FLAGS) -c $(SOURCE_NAME).c -o $(LIB_NAME).o
 	$(CC) -fPIC $(FLAGS) -shared -o $(LIB_NAME).so $(LIB_NAME).o
 	make clean
 

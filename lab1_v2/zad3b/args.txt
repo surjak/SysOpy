@@ -1,0 +1,24 @@
+start create_table 100 end "table create 100"
+start compare_pairs "txt/a.txt:txt/b.txt txt/c.txt:txt/d.txt txt/e.txt:txt/f.txt txt/g.txt:txt/h.txt" end "small diff"
+start remove_block 0 end "small remove from array"
+start remove_operation 2 0 end "small remove operation from array"
+start compare_pairs "txt/big2.txt:txt/big.txt txt/c.txt:txt/d.txt txt/e.txt:txt/big.txt txt/g.txt:txt/h.txt 
+txt/a.txt:txt/b.txt txt/big2.txt:txt/d.txt txt/e.txt:txt/f.txt txt/g.txt:txt/h.txt
+txt/a.txt:txt/b.txt txt/c.txt:txt/d.txt txt/big2.txt:txt/big.txt txt/g.txt:txt/h.txt" end "medium diff"
+start remove_block 6 end "medium remove from array"
+start remove_operation 10 1 end "medium remove operation from array"
+start compare_pairs "txt/big2.txt:txt/big.txt txt/c.txt:txt/d.txt txt/e.txt:txt/big.txt txt/g.txt:txt/h.txt txt/a.txt:txt/big2.txt txt/c.txt:txt/big.txt 
+txt/big2.txt:txt/b.txt txt/c.txt:txt/d.txt txt/big2.txt:txt/big.txt txt/a.txt:txt/h.txt txt/a.txt:txt/big2.txt txt/c.txt:txt/big.txt 
+txt/big2.txt:txt/big.txt txt/c.txt:txt/d.txt txt/e.txt:txt/big.txt txt/g.txt:txt/h.txt txt/a.txt:txt/big2.txt txt/c.txt:txt/big.txt 
+txt/big2.txt:txt/big.txt txt/c.txt:txt/d.txt txt/e.txt:txt/big.txt txt/g.txt:txt/h.txt txt/a.txt:txt/big2.txt txt/c.txt:txt/big.txt 
+txt/big2.txt:txt/big.txt txt/c.txt:txt/d.txt txt/e.txt:txt/big.txt txt/g.txt:txt/h.txt txt/a.txt:txt/big2.txt txt/big.txt:txt/big2.txt " end "big diff"
+start remove_block 30 end "big remove from array"
+start remove_operation 25 1 end "big remove operation from array"
+start tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+tmp_to_array remove_block 0
+end "add remove 7 times"

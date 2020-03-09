@@ -4,7 +4,8 @@
 #include <string.h>
 
 char *tmp_file = "tmp.txt";
-
+char *files_sequence = NULL;
+Diff_handler *diff_handler;
 int create_table(unsigned int size)
 {
     diff_handler = calloc(1, sizeof(diff_handler));
@@ -162,7 +163,6 @@ void compare_pairs()
     int count = 0;
     while (token != NULL)
     {
-        char *f1 = token;
         token = strtok(NULL, " ");
         count++;
     }
@@ -207,7 +207,7 @@ void delete_block(int idx)
     diff_handler->block_array[idx] = NULL;
 }
 
-void remove_opearation(int block_idx, int operation_idx)
+void remove_operation(int block_idx, int operation_idx)
 {
     if (diff_handler->block_array[block_idx] == NULL)
     {
@@ -279,10 +279,10 @@ void delete_array()
 //     // printf("%s", diff_handler->block_array[2]->operations[0]->content);
 //     // compare_pairs();
 //     tmp_to_array();
-//     remove_opearation(0, 0);
-//     // remove_opearation(0, 0);
-//     // remove_opearation(0, 23);
-//     // remove_opearation(0, 3);
+//     remove_operation(0, 0);
+//     // remove_operation(0, 0);
+//     // remove_operation(0, 23);
+//     // remove_operation(0, 3);
 //     // tmp_to_array();
 
 //     compare_pairs();

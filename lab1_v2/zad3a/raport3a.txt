@@ -1,0 +1,39 @@
+static:
+                          Name		       Real [s]	       User [s]	     System [s]	 Child User [s]	Child System [s]
+              table create 100:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+                    small diff:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+       small remove from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+small remove operation from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+                   medium diff:		       0.020000	       0.000000	       0.000000	       0.010000	       0.000000	
+      medium remove from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+medium remove operation from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+                      big diff:		       0.050000	       0.000000	       0.000000	       0.040000	       0.000000	
+         big remove from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+big remove operation from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+            add remove 7 times:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+shared:
+                          Name		       Real [s]	       User [s]	     System [s]	 Child User [s]	Child System [s]
+              table create 100:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+                    small diff:		       0.010000	       0.000000	       0.000000	       0.000000	       0.000000	
+       small remove from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+small remove operation from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+                   medium diff:		       0.020000	       0.000000	       0.000000	       0.020000	       0.000000	
+      medium remove from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+medium remove operation from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+                      big diff:		       0.050000	       0.000000	       0.000000	       0.030000	       0.010000	
+         big remove from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+big remove operation from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+            add remove 7 times:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+dynamic:
+                          Name		       Real [s]	       User [s]	     System [s]	 Child User [s]	Child System [s]
+              table create 100:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+                    small diff:		       0.010000	       0.000000	       0.000000	       0.000000	       0.000000	
+       small remove from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+small remove operation from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+                   medium diff:		       0.010000	       0.000000	       0.000000	       0.010000	       0.000000	
+      medium remove from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+medium remove operation from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+                      big diff:		       0.050000	       0.000000	       0.000000	       0.040000	       0.000000	
+         big remove from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+big remove operation from array:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
+            add remove 7 times:		       0.000000	       0.000000	       0.000000	       0.000000	       0.000000	
