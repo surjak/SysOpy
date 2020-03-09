@@ -40,11 +40,6 @@ int diff_files(char *file1, char *file2)
     return 0;
 }
 
-void delete_tmp()
-{
-    system("rm tmp.txt");
-}
-
 void load_buffer_into_array(char *buff, Operation ***tab, int size)
 {
     char *stack[size];
@@ -71,7 +66,6 @@ void load_buffer_into_array(char *buff, Operation ***tab, int size)
         {
             (*tab)[j]->content = calloc(strlen(stack[j]) + 1, sizeof(char));
             memcpy((*tab)[j]->content, stack[j], strlen(stack[j]));
-            delete_tmp();
             return;
         }
         (*tab)[j]->content = calloc(strlen(stack[j]) - strlen(stack[j + 1]) + 1, sizeof(char));
@@ -155,9 +149,6 @@ void compare_pair(char *pair)
     char *f1 = strtok(string, ":");
     char *f2 = strtok(NULL, "");
 
-    // printf("%s\n", f1);
-    // printf("%s\n", f2);
-
     diff_files(f1, f2);
     tmp_to_array();
 }
@@ -196,6 +187,8 @@ void compare_pairs()
 
 int get_operations_count(int idx)
 {
+    if (diff_handler->block_array[idx] == NULL)
+        return 0;
     return diff_handler->block_array[idx]->count;
 }
 
@@ -216,6 +209,18 @@ void delete_block(int idx)
 
 void remove_opearation(int block_idx, int operation_idx)
 {
+    if (diff_handler->block_array[block_idx] == NULL)
+    {
+        fprintf(stderr, "index in array doesn't exist\n");
+        return;
+    }
+
+    if (diff_handler->block_array[block_idx]->operations[operation_idx] == NULL)
+    {
+        fprintf(stderr, "index in operation array doesn't exist\n");
+        return;
+    }
+
     free(diff_handler->block_array[block_idx]->operations[operation_idx]);
     diff_handler->block_array[block_idx]->operations[operation_idx] = NULL;
     int count = diff_handler->block_array[block_idx]->count;
@@ -231,11 +236,24 @@ void remove_opearation(int block_idx, int operation_idx)
 
 Operations *get_block(int idx)
 {
+    if (diff_handler->block_array[idx] == NULL)
+    {
+        fprintf(stderr, "index doesn't exist\n");
+    }
+
     return diff_handler->block_array[idx];
 }
 
 char *get_operation(int block_idx, int operation_idx)
 {
+    if (diff_handler->block_array[block_idx] == NULL)
+    {
+        fprintf(stderr, "index in array doesn't exist\n");
+    }
+    if (diff_handler->block_array[block_idx]->operations[operation_idx] == NULL)
+    {
+        fprintf(stderr, "index in operation array doesn't exist\n");
+    }
     return diff_handler->block_array[block_idx]->operations[operation_idx]->content;
 }
 
@@ -249,31 +267,33 @@ void delete_array()
     free(diff_handler);
 }
 
-int main()
-{
-    define_pair_sequence("txt/a.txt:txt/b.txt txt/c.txt:txt/d.txt txt/a.txt:txt/c.txt");
-    create_table(20);
-    compare_pairs();
-    // tmp_to_array();
+// int main()
+// {
+//     define_pair_sequence("txt/a.txt:txt/b.txt txt/c.txt:txt/d.txt txt/a.txt:txt/c.txt txt/e.txt:txt/f.txt txt/f.txt:txt/c.txt");
+//     create_table(20);
+//     compare_pairs();
+//     tmp_to_array();
 
-    // printf("%s", diff_handler->block_array[0]->operations[2]->content);
-    // delete_block(0);
-    // printf("%s", diff_handler->block_array[2]->operations[0]->content);
-    // compare_pairs();
+//     // printf("%s", diff_handler->block_array[0]->operations[2]->content);
+//     delete_block(0);
+//     // printf("%s", diff_handler->block_array[2]->operations[0]->content);
+//     // compare_pairs();
+//     tmp_to_array();
+//     remove_opearation(0, 0);
+//     // remove_opearation(0, 0);
+//     // remove_opearation(0, 23);
+//     // remove_opearation(0, 3);
+//     // tmp_to_array();
 
-    // remove_opearation(0, 1);
-    // remove_opearation(0, 0);
-    // remove_opearation(0, 2);
-    // remove_opearation(0, 3);
-    // compare_pairs();
-    // printf("%d\n", get_operations_count(0));
+//     compare_pairs();
+//     // printf("%d\n", get_operations_count(0));
 
-    Operations *ope = get_block(2);
-    for (int i = 0; i < ope->count; i++)
-    {
-        printf("%d: \n%s\n\n", i, ope->operations[i]->content);
-    }
+//     Operations *ope = get_block(0);
+//     for (int i = 0; i < ope->count; i++)
+//     {
+//         printf("%d: \n%s\n\n", i, ope->operations[i]->content);
+//     }
 
-    // printf("\n\n\n\n\n%s\n\n", get_operation(0, 1));
-    delete_array();
-}
+//     // printf("\n\n\n\n\n%s\n\n", get_operation(0, 1));
+//     delete_array();
+// }
