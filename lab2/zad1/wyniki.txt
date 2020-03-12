@@ -1,0 +1,81 @@
+                                    Name		       Real [s]	       User [s]	     System [s]
+       copy lib, records: 1000, bytes: 1:		       0.000000	       0.000000	       0.000000
+       copy sys, records: 1000, bytes: 1:		       0.010000	       0.000000	       0.000000
+       copy lib, records: 5000, bytes: 1:		       0.000000	       0.000000	       0.000000
+       copy sys, records: 5000, bytes: 1:		       0.010000	       0.000000	       0.010000
+      copy lib, records: 10000, bytes: 1:		       0.000000	       0.000000	       0.000000
+      copy sys, records: 10000, bytes: 1:		       0.030000	       0.000000	       0.030000
+       copy lib, records: 1000, bytes: 4:		       0.000000	       0.000000	       0.000000
+       copy sys, records: 1000, bytes: 4:		       0.000000	       0.000000	       0.000000
+       copy lib, records: 5000, bytes: 4:		       0.000000	       0.000000	       0.000000
+       copy sys, records: 5000, bytes: 4:		       0.010000	       0.000000	       0.000000
+      copy lib, records: 10000, bytes: 4:		       0.000000	       0.000000	       0.000000
+      copy sys, records: 10000, bytes: 4:		       0.020000	       0.000000	       0.020000
+     copy lib, records: 1000, bytes: 512:		       0.000000	       0.000000	       0.000000
+     copy sys, records: 1000, bytes: 512:		       0.000000	       0.000000	       0.000000
+     copy lib, records: 5000, bytes: 512:		       0.010000	       0.000000	       0.000000
+     copy sys, records: 5000, bytes: 512:		       0.010000	       0.000000	       0.000000
+    copy lib, records: 10000, bytes: 512:		       0.000000	       0.000000	       0.000000
+    copy sys, records: 10000, bytes: 512:		       0.020000	       0.000000	       0.020000
+    copy lib, records: 1000, bytes: 1024:		       0.000000	       0.000000	       0.000000
+    copy sys, records: 1000, bytes: 1024:		       0.000000	       0.000000	       0.000000
+    copy lib, records: 5000, bytes: 1024:		       0.000000	       0.000000	       0.000000
+    copy sys, records: 5000, bytes: 1024:		       0.010000	       0.000000	       0.000000
+   copy lib, records: 10000, bytes: 1024:		       0.010000	       0.000000	       0.000000
+   copy sys, records: 10000, bytes: 1024:		       0.030000	       0.000000	       0.010000
+    copy lib, records: 1000, bytes: 4096:		       0.000000	       0.000000	       0.000000
+    copy sys, records: 1000, bytes: 4096:		       0.000000	       0.000000	       0.000000
+    copy lib, records: 5000, bytes: 4096:		       0.010000	       0.000000	       0.010000
+    copy sys, records: 5000, bytes: 4096:		       0.020000	       0.000000	       0.010000
+   copy lib, records: 10000, bytes: 4096:		       0.040000	       0.000000	       0.030000
+   copy sys, records: 10000, bytes: 4096:		       0.040000	       0.000000	       0.030000
+    copy lib, records: 1000, bytes: 8192:		       0.000000	       0.000000	       0.000000
+    copy sys, records: 1000, bytes: 8192:		       0.010000	       0.000000	       0.000000
+    copy lib, records: 5000, bytes: 8192:		       0.040000	       0.000000	       0.030000
+    copy sys, records: 5000, bytes: 8192:		       0.030000	       0.000000	       0.020000
+   copy lib, records: 10000, bytes: 8192:		       0.090000	       0.030000	       0.060000
+   copy sys, records: 10000, bytes: 8192:		       0.060000	       0.000000	       0.050000
+       sort lib, records: 1000, bytes: 1:		       0.040000	       0.020000	       0.010000
+       sort sys, records: 1000, bytes: 1:		       0.040000	       0.020000	       0.020000
+       sort lib, records: 5000, bytes: 1:		       0.260000	       0.130000	       0.110000
+       sort sys, records: 5000, bytes: 1:		       0.350000	       0.180000	       0.170000
+      sort lib, records: 10000, bytes: 1:		       0.710000	       0.480000	       0.220000
+      sort sys, records: 10000, bytes: 1:		       1.150000	       0.600000	       0.550000
+       sort lib, records: 1000, bytes: 4:		       0.040000	       0.020000	       0.010000
+       sort sys, records: 1000, bytes: 4:		       0.030000	       0.010000	       0.020000
+       sort lib, records: 5000, bytes: 4:		       0.320000	       0.180000	       0.130000
+       sort sys, records: 5000, bytes: 4:		       0.420000	       0.200000	       0.210000
+      sort lib, records: 10000, bytes: 4:		       0.720000	       0.460000	       0.260000
+      sort sys, records: 10000, bytes: 4:		       1.160000	       0.540000	       0.610000
+     sort lib, records: 1000, bytes: 512:		       0.050000	       0.010000	       0.030000
+     sort sys, records: 1000, bytes: 512:		       0.050000	       0.010000	       0.020000
+     sort lib, records: 5000, bytes: 512:		       0.390000	       0.210000	       0.170000
+     sort sys, records: 5000, bytes: 512:		       0.430000	       0.190000	       0.230000
+    sort lib, records: 10000, bytes: 512:		       0.920000	       0.530000	       0.370000
+    sort sys, records: 10000, bytes: 512:		       1.210000	       0.660000	       0.540000
+    sort lib, records: 1000, bytes: 1024:		       0.050000	       0.020000	       0.020000
+    sort sys, records: 1000, bytes: 1024:		       0.050000	       0.020000	       0.020000
+    sort lib, records: 5000, bytes: 1024:		       0.380000	       0.150000	       0.220000
+    sort sys, records: 5000, bytes: 1024:		       0.410000	       0.190000	       0.210000
+   sort lib, records: 10000, bytes: 1024:		       1.040000	       0.610000	       0.410000
+   sort sys, records: 10000, bytes: 1024:		       1.270000	       0.640000	       0.630000
+    sort lib, records: 1000, bytes: 4096:		       0.060000	       0.020000	       0.030000
+    sort sys, records: 1000, bytes: 4096:		       0.050000	       0.020000	       0.030000
+    sort lib, records: 5000, bytes: 4096:		       0.450000	       0.220000	       0.220000
+    sort sys, records: 5000, bytes: 4096:		       0.430000	       0.200000	       0.220000
+   sort lib, records: 10000, bytes: 4096:		       1.400000	       0.690000	       0.710000
+   sort sys, records: 10000, bytes: 4096:		       1.320000	       0.660000	       0.650000
+    sort lib, records: 1000, bytes: 8192:		       0.060000	       0.030000	       0.020000
+    sort sys, records: 1000, bytes: 8192:		       0.060000	       0.010000	       0.040000
+    sort lib, records: 5000, bytes: 8192:		       0.610000	       0.260000	       0.340000
+    sort sys, records: 5000, bytes: 8192:		       0.590000	       0.230000	       0.350000
+   sort lib, records: 10000, bytes: 8192:		       2.090000	       0.900000	       1.170000
+   sort sys, records: 10000, bytes: 8192:		       1.950000	       0.850000	       1.090000
+
+WNIOSKI:
+- Operacje kopiowania sa praktycznie w zerowyn czasie.
+- Jeśli mamy dużo rekordów, które mają mało bajtów to lib jest wyraźnie szybsze od sys. 
+- Im wiecej bajtow maja rekordy tym sys jest szybsze w porownaniu do lib.
+Dzieje się tak, ponieważ funkcja fwrite buforuje operacje zapisania do pliku i dopiero
+po kilku wywołaniach faktycznie dokonuje wpisania do pliku, dzięki czemu zaoszczędza na czasie
+i wywołaniach systemowych. Im większy blok trzeba zapisać tym szybciej bufor się wyczerpuje.
