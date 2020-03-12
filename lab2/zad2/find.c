@@ -90,8 +90,8 @@ void maxdepth(char *root_path, int depth)
 
 void mtime(char *root_path, char mode, int count, time_t date)
 {
-    // if (count == 0)
-    //     return;
+    if (count == 0)
+        return;
     if (root_path == NULL)
         return;
     DIR *dir = opendir(root_path);
@@ -126,7 +126,7 @@ void mtime(char *root_path, char mode, int count, time_t date)
                 continue;
             }
 
-            mtime(new_path, mode, count, date);
+            mtime(new_path, mode, count - 1, date);
         }
         time_t modif_time = sb.st_mtime;
         if (mode == '-')
@@ -136,7 +136,6 @@ void mtime(char *root_path, char mode, int count, time_t date)
                 continue;
 
             print_from_stat(new_path, &sb);
-            // printf("%d\n\n", diff_modif);
         }
         else if (mode == '+')
         {
@@ -145,7 +144,6 @@ void mtime(char *root_path, char mode, int count, time_t date)
                 continue;
 
             print_from_stat(new_path, &sb);
-            // printf("%d\n\n", diff_modif);
         }
         else if (mode == '=')
         {
@@ -153,13 +151,8 @@ void mtime(char *root_path, char mode, int count, time_t date)
             int diff_modif = abs(difftime(modif_time, date)) / (60 * 60 * 24);
             int diff_modif2 = difftime(date, modif_time);
 
-            // int diff_modif_2 = difftime(modif_time, date);
-
-            // printf("%d\n\n", diff_modif);
             if ((diff_modif == 0 && mode == '=') && !(diff_modif2 < 0 && mode == '='))
                 print_from_stat(new_path, &sb);
-
-            // printf("%d\n\n", diff_modif);
         }
     }
     closedir(dir);
@@ -167,8 +160,8 @@ void mtime(char *root_path, char mode, int count, time_t date)
 
 void atime(char *root_path, char mode, int count, time_t date)
 {
-    // if (count == 0)
-    //     return;
+    if (count == 0)
+        return;
     if (root_path == NULL)
         return;
     DIR *dir = opendir(root_path);
@@ -203,7 +196,7 @@ void atime(char *root_path, char mode, int count, time_t date)
                 continue;
             }
 
-            atime(new_path, mode, count, date);
+            atime(new_path, mode, count - 1, date);
         }
         time_t modif_time = sb.st_atime;
         if (mode == '-')
@@ -213,7 +206,6 @@ void atime(char *root_path, char mode, int count, time_t date)
                 continue;
 
             print_from_stat(new_path, &sb);
-            // printf("%d\n\n", diff_modif);
         }
         else if (mode == '+')
         {
@@ -222,7 +214,6 @@ void atime(char *root_path, char mode, int count, time_t date)
                 continue;
 
             print_from_stat(new_path, &sb);
-            // printf("%d\n\n", diff_modif);
         }
         else if (mode == '=')
         {
@@ -230,19 +221,14 @@ void atime(char *root_path, char mode, int count, time_t date)
             int diff_modif = abs(difftime(modif_time, date)) / (60 * 60 * 24);
             int diff_modif2 = difftime(date, modif_time);
 
-            // int diff_modif_2 = difftime(modif_time, date);
-
-            // printf("%d\n\n", diff_modif);
             if ((diff_modif == 0 && mode == '=') && !(diff_modif2 < 0 && mode == '='))
                 print_from_stat(new_path, &sb);
-
-            // printf("%d\n\n", diff_modif);
         }
     }
     closedir(dir);
 }
 
-void print_files_handler(char *root_path, char *command, char mode, int count)
+void print_files_handler(char *root_path, char *command, char mode, int count, int maxdep)
 {
     if (strcmp(command, "maxdepth") == 0)
     {
@@ -256,9 +242,15 @@ void print_files_handler(char *root_path, char *command, char mode, int count)
         time(&rawtime);
         timeinfo = localtime(&rawtime);
         timeinfo->tm_mday -= count;
-        // printf("Current local time and date: %s", asctime(timeinfo));
-        // print_files(argv[1], argv[2][0], mktime(timeinfo), print_from_stat);
-        mtime(root_path, mode, count, mktime(timeinfo));
+
+        if (maxdep >= 0)
+        {
+            mtime(root_path, mode, maxdep, mktime(timeinfo));
+        }
+        else
+        {
+            mtime(root_path, mode, -1, mktime(timeinfo));
+        }
     }
     else if (strcmp(command, "atime") == 0)
     {
@@ -268,15 +260,19 @@ void print_files_handler(char *root_path, char *command, char mode, int count)
         time(&rawtime);
         timeinfo = localtime(&rawtime);
         timeinfo->tm_mday -= count;
-        // printf("Current local time and date: %s", asctime(timeinfo));
-        // print_files(argv[1], argv[2][0], mktime(timeinfo), print_from_stat);
-        atime(root_path, mode, count, mktime(timeinfo));
+
+        if (maxdep >= 0)
+        {
+            atime(root_path, mode, maxdep, mktime(timeinfo));
+        }
+        else
+        {
+            atime(root_path, mode, -1, mktime(timeinfo));
+        }
     }
 }
 
 int main()
 {
-    char tab[5] = {'a'};
-    // print_files_handler(".", "maxdepth", tab[0], 6);
-    print_files_handler("../../", "atime", '-', 2);
+    print_files_handler("../../", "mtime", '-', 1, 2);
 }
