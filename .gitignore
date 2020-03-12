@@ -25,3 +25,5 @@ original.txt
 /lab2/zad1/*.a
 !/lab2/zad1/wyniki.txt
 /lab2/zad1/generator_prog
+
+.vscode
