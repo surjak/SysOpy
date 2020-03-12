@@ -21,6 +21,7 @@ original.txt
 
 /lab2/zad1/*.txt
 /lab2/zad2/*.txt
+/lab2/zad2/find_ex.c
 /lab2/zad1/*.a
 !/lab2/zad1/wyniki.txt
 /lab2/zad1/generator_prog
