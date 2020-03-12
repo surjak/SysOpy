@@ -9,7 +9,6 @@
 void generate(const char *file_name, const unsigned int num_records, const unsigned int byte_num)
 {
     char buff[64];
-    // snprintf(buff, sizeof buff, "head -c %d /dev/urandom > %s", num_records * byte_num, file_name);
 
     snprintf(buff, sizeof buff, "</dev/urandom tr -dc 'A-Z0-9a-z' | head -c %d > %s", num_records * byte_num, file_name);
     int find_status = system(buff);
@@ -18,13 +17,10 @@ void generate(const char *file_name, const unsigned int num_records, const unsig
         fprintf(stderr, "error while generating: %s\n", strerror(errno));
         exit(-1);
     }
-    system("cat tmp.txt > original.txt");
-    system("cat tmp.txt > tmp2.txt");
 }
 
 void swap_in_file_lib(FILE *f, const unsigned int num_records, const unsigned int byte_num, unsigned int i, unsigned int j)
 {
-    // printf("\n\n\n alalallala\n\n\n");
 
     char *tmp1 = malloc(byte_num);
     char *tmp2 = malloc(byte_num);
@@ -46,8 +42,6 @@ void swap_in_file_lib(FILE *f, const unsigned int num_records, const unsigned in
     }
     if (fread(tmp2, 1, byte_num, f) != byte_num)
     {
-        printf("%d : %d", i, j);
-
         fprintf(stderr, "4cant read sort lib: %s\n", strerror(errno));
         exit(-1);
     }
@@ -148,24 +142,6 @@ void sort_lib(const char *file_name, const unsigned int num_records, const unsig
     }
     qSort_lib(f, num_records, byte_num, 0, num_records - 1);
 
-    // if (fseek(f, 0, SEEK_SET) < 0)
-    // {
-    //     fprintf(stderr, "cant seek sort lib: %s\n", strerror(errno));
-    //     exit(-1);
-    // }
-    // char *tmp1 = malloc(num_records * byte_num);
-    // if (fread(tmp1, 1, num_records * byte_num, f) != num_records * byte_num)
-    // {
-    //     fprintf(stderr, "8cant read sort lib: %s\n", strerror(errno));
-    //     exit(-1);
-    // }
-
-    // for (int i = 0; i < num_records * byte_num - byte_num; i += byte_num)
-    // {
-    //     if (tmp1[i] > tmp1[i + byte_num])
-    //         printf("\n\n\nZLE: %s\n\n\n", tmp1);
-    // }
-
     fclose(f);
 }
 
@@ -192,7 +168,6 @@ void swap_in_file_sys(int f, const unsigned int num_records, const unsigned int 
     }
     if (read(f, tmp2, byte_num) < 0)
     {
-        printf("%d : %d", i, j);
 
         fprintf(stderr, "4cant read sort lib: %s\n", strerror(errno));
         exit(-1);
@@ -293,29 +268,75 @@ void sort_sys(const char *file_name, const unsigned int num_records, const unsig
         exit(-1);
     }
     qSort_sys(f, num_records, byte_num, 0, num_records - 1);
-    // lseek(f, 0, SEEK_SET);
-    // char *tmp1 = malloc(num_records * byte_num);
-    // if (read(f, tmp1, num_records * byte_num) < 0)
-    // {
-    //     fprintf(stderr, "8cant read sort lib: %s\n", strerror(errno));
-    //     exit(-1);
-    // }
-
-    // for (int i = 0; i < num_records * byte_num - byte_num; i += byte_num)
-    // {
-    //     if (tmp1[i] > tmp1[i + byte_num])
-    //         printf("\n\n\nZLE: %s\n\n\n", tmp1);
-    // }
 
     close(f);
 }
 
-int main()
+void copy_sys(const char *file_from, const char *file_to, const unsigned int num_records, const unsigned int byte_num)
 {
-    generate("tmp.txt", 10, 2);
+    int from = open(file_from, O_RDONLY);
+    if (from < 0)
+    {
+        fprintf(stderr, "cant open source file copy sys: %s\n", strerror(errno));
+        exit(-1);
+    }
+    int to = open(file_to, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+    if (to < 0)
+    {
+        fprintf(stderr, "cant open destination file copy sys: %s\n", strerror(errno));
+        exit(-1);
+    }
 
-    sort_sys("tmp.txt", 10, 2);
-    printf("\n\n\n\n");
-    sort_lib("tmp2.txt", 10, 2);
-    return 0;
+    unsigned char *holder = malloc(byte_num);
+    for (int i = 0; i < num_records; ++i)
+    {
+
+        if (read(from, holder, byte_num) < 0)
+        {
+            fprintf(stderr, "cant read from source file copy sys: %s\n", strerror(errno));
+            exit(-1);
+        }
+        if (write(to, holder, byte_num) < 0)
+        {
+            fprintf(stderr, "cant write to dst file copy sys: %s\n", strerror(errno));
+            exit(-1);
+        }
+    }
+    free(holder);
+    close(from);
+    close(to);
+}
+
+void copy_lib(const char *file_from, const char *file_to, const unsigned int num_records, const unsigned int byte_num)
+{
+    FILE *src_file = fopen(file_from, "r");
+    if (src_file == NULL)
+    {
+        fprintf(stderr, "cant open source file copy lib: %s\n", strerror(errno));
+        exit(-1);
+    }
+    FILE *dst_file = fopen(file_to, "w");
+    if (dst_file == NULL)
+    {
+        fprintf(stderr, "cant open dst file copy lib: %s\n", strerror(errno));
+        exit(-1);
+    }
+
+    unsigned char *holder = malloc(byte_num);
+    for (int i = 0; i < num_records; i++)
+    {
+        if (fread(holder, 1, byte_num, src_file) != byte_num)
+        {
+            fprintf(stderr, "cant read from source file copy lib: %s\n", strerror(errno));
+            exit(-1);
+        }
+        if (fwrite(holder, 1, byte_num, dst_file) != byte_num)
+        {
+            fprintf(stderr, "cant write to dst file copy lib: %s\n", strerror(errno));
+            exit(-1);
+        }
+    }
+    free(holder);
+    fclose(src_file);
+    fclose(dst_file);
 }

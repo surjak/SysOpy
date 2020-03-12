@@ -16,4 +16,8 @@
 main
 tmp.txt
 
+tmp2.txt
+original.txt
 
+/lab2/zad1/*.txt
+/lab2/zad2/*.txt
