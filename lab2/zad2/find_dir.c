@@ -230,6 +230,7 @@ void atime(char *root_path, char mode, int count, time_t date)
 
 void print_files_handler(char *root_path, char *command, char mode, int count, int maxdep)
 {
+
     if (strcmp(command, "maxdepth") == 0)
     {
         maxdepth(root_path, count);
@@ -242,6 +243,10 @@ void print_files_handler(char *root_path, char *command, char mode, int count, i
         time(&rawtime);
         timeinfo = localtime(&rawtime);
         timeinfo->tm_mday -= count;
+        if (mode == '+')
+        {
+            timeinfo->tm_mday -= 1;
+        }
 
         if (maxdep >= 0)
         {
@@ -260,7 +265,10 @@ void print_files_handler(char *root_path, char *command, char mode, int count, i
         time(&rawtime);
         timeinfo = localtime(&rawtime);
         timeinfo->tm_mday -= count;
-
+        if (mode == '+')
+        {
+            timeinfo->tm_mday -= 1;
+        }
         if (maxdep >= 0)
         {
             atime(root_path, mode, maxdep, mktime(timeinfo));
@@ -274,5 +282,6 @@ void print_files_handler(char *root_path, char *command, char mode, int count, i
 
 int main()
 {
-    print_files_handler("../../", "mtime", '-', 1, 2);
+    print_files_handler("../../", "mtime", '+', 7, -1);
+    return 0;
 }
