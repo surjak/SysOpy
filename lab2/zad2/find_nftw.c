@@ -59,14 +59,15 @@ int file_info(const char *filename, const struct stat *statptr,
 
         return 0;
     }
-    if (command == "maxdepth")
+    if (strcmp(command, "maxdepth") == 0)
     {
         print_from_stat(filename, statptr);
 
         return 0;
     }
-    else if (command == "mtime")
+    else if (strcmp(command, "mtime") == 0)
     {
+
         time_t modif_time = statptr->st_mtime;
 
         if (follow_mode == '-')
@@ -97,7 +98,7 @@ int file_info(const char *filename, const struct stat *statptr,
             return 0;
         }
     }
-    else if (command == "atime")
+    else if (strcmp(command, "atime") == 0)
     {
         time_t modif_time = statptr->st_atime;
 
@@ -129,10 +130,12 @@ int file_info(const char *filename, const struct stat *statptr,
             return 0;
         }
     }
+    return 0;
 }
 
 void print_files_handler(char *root_path, char *comm, char mode, int count, int maxdep)
 {
+
     int flags = FTW_PHYS;
     int fd_limit = 2;
     follow_mode = mode;
@@ -159,7 +162,18 @@ void print_files_handler(char *root_path, char *comm, char mode, int count, int 
 int main(int argc, char *argv[])
 {
 
-    print_files_handler("../../", "atime", '=', 2, -1);
+    if (argc != 6)
+    {
+        fprintf(stderr, "wrong arguments\n");
+        exit(-1);
+    }
+    char *dir = argv[1];
+    char *comman = argv[2];
+    char *mod = argv[3];
+    int day = atoi(argv[4]);
+    int mdep = atoi(argv[5]);
+
+    print_files_handler(dir, comman, mod[0], day, mdep);
 
     return 0;
 }

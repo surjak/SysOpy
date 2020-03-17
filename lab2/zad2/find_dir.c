@@ -280,8 +280,19 @@ void print_files_handler(char *root_path, char *command, char mode, int count, i
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    print_files_handler("../../", "mtime", '+', 7, -1);
+    if (argc != 6)
+    {
+        fprintf(stderr, "wrong arguments\n");
+        exit(-1);
+    }
+    char *dir = argv[1];
+    char *comman = argv[2];
+    char *mod = argv[3];
+    int day = atoi(argv[4]);
+    int mdep = atoi(argv[5]);
+
+    print_files_handler(dir, comman, mod[0], day, mdep);
     return 0;
 }
