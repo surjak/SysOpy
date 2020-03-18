@@ -1,5 +1,3 @@
-#define _XOPEN_SOURCE 500
-
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
