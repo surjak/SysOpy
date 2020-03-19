@@ -37,7 +37,6 @@ Matrix *create_matrix(char *path, unsigned int rows, unsigned int cols)
 
 void set_value(Matrix *matrix, double value, unsigned int r, unsigned int c)
 {
-
     fseek(matrix->file, (matrix->num_cols * r + c) * sizeof(double) + offset, SEEK_SET);
     fwrite(&value, sizeof(double), 1, matrix->file);
 }
@@ -92,12 +91,23 @@ void multiply_i_column(Matrix *A, Matrix *B, int i, int count_of_processes, Matr
     lock.l_type = F_WRLCK;
 
     fcntl(fd, F_SETLKW, &lock);
-    for (int c = 0; c < (*C)->num_cols; c++)
-    {
-        for (int r = 0; r < (*C)->num_rows; r++)
-        {
 
-            set_value(*C, 1.0, r, c);
+    for (int j = i; j < (*C)->num_cols; j += count_of_processes)
+    {
+        for (int r_a = 0; r_a < (*C)->num_rows; r_a++)
+        {
+            double value = 0.0;
+            for (int c = 0; c < (*C)->num_cols; c++)
+            {
+
+                value += get_value(A, r_a, c) * get_value(B, c, j);
+            }
+
+            // printf("%f\n", value);
+
+            set_value(*C, value, r_a, j);
+            printf("%d     %d  %d      %f     \n", getpid(), r_a, j, value);
+            // wait(NULL);
         }
     }
     lock.l_type = F_UNLCK;
@@ -150,7 +160,7 @@ Matrix *multiply_matrices(Matrix *A, Matrix *B, char *output, unsigned int count
 int main()
 {
 
-    int rows = 4, cols = 4;
+    int rows = 10, cols = 10;
     Matrix *m = create_matrix("A", rows, cols);
     for (int row = 0; row < rows; row++)
     {
@@ -176,7 +186,7 @@ int main()
     print_matrix(b);
     printf("\n\n\n");
 
-    Matrix *C = multiply_matrices(m, b, "C", 3, 3.0);
+    Matrix *C = multiply_matrices(m, b, "C", 10, 3.0);
 
     print_matrix(C);
 }
