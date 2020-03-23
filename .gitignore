@@ -29,3 +29,9 @@ original.txt
 .vscode
 
 /lab2/zad2/test/
+/lab3/*/*.txt
+/lab3/zad2/A
+/lab3/zad2/B
+/lab3/zad2/C
+/lab3/pr
+/lab3/zad2_delete
