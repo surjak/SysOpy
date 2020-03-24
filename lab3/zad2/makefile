@@ -1,20 +1,16 @@
-CC=gcc -Wall
-
-all: build generate run
-
-build: generate.c matrix.c
-	$(CC) -o generate generate.c
-	$(CC) -o matrix matrix.c -lm
-
-
-generate: generate
-	mkdir tests
-	./generate 10 5 50
-
-run: matrix
-	./matrix list 4 1 1
-
-
+CC = gcc -Wall -std=c11 -ggdb
 
 clean:
-	rm -rf tests generate matrix list
+	rm -f -r .tmp files pom matrix lista
+
+helper:
+	rm -f pom
+	$(CC) help.c -o pom
+
+test:
+	make clean
+	$(CC) help.c -o pom 
+	$(CC) matrix.c -o matrix
+	./pom create 7 14 5
+	./matrix lista 6 3 1
+	./pom check lista
