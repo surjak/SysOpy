@@ -1,8 +1,10 @@
+#define _POSIX_C_SOURCE 1
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/types.h>
 
 void handler(int sig)
 {

@@ -3,15 +3,15 @@ all:
 	make clean
 
 exec:
-	gcc -o main main.c
-	gcc -o exec exec.c
+	gcc -Wall -std=c99 -o  main main.c
+	gcc -Wall -std=c99  -o exec exec.c
 	./main ignore exec
 	./main pending exec
 	./main mask exec
 	./main handler exec
 
 normal:
-	gcc -o main main.c
+	gcc -Wall -std=c99  -o main main.c
 	./main ignore n
 	./main pending n
 	./main mask n
