@@ -1,0 +1,6 @@
+Raport dla fork():
+Sygnal ktory czeka w przodku nie jest widoczny w dziecku po wywolaniu funcjki fork().
+Proces potomny "dziedziczy" maskowanie, handlery i ignorowanie.
+Raport dla exec():
+Po wykonaniu fincji exec dziedziczone jest maskowanie i ignorowanie.
+Sygnal oczekujacy w przodku rowniez oczekuje w potomku.
