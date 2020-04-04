@@ -2,9 +2,9 @@ CC = gcc
 FLAGS = -std=c99 -Wall
 
 all:
-	make clean
 	make pipes
 	make popen
+	make clean
 
 pipes:
 	$(CC) $(FLAGS) -o pipes pipes.c 
