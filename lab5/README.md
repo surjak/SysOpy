@@ -1,6 +1,6 @@
 # Zadania - Zestaw 5  
 # Potoki nazwane i nienazwane  
-## Zadanie 1 (60%)  
+## Zadanie 1 (50%)  
 Napisz interpreter poleceń przechowywanych w pliku. Ścieżka do pliku to pierwszy argument wywołania programu.  
   
 Polecenia w pliku przechowywane są w kolejnych liniach w postaci:   
@@ -14,7 +14,9 @@ prog1 arg1 ... argn1 | prog2 arg1 ... argn2 | ... | progN arg1 ... argnN
 Program należy zaimplementować w dwóch wariantach:  
 - Korzystając z funkcji pipe/fork/exec (50%)  
 - Korzystając z popen (10%)  
-## Zadanie 2 (40%)
+##Zadanie 2 (10%)
+Napisać program przyjmujący jeden argument - ścieżkę do pliku tekstowego zawierających kilka linii tekstu (dowolne znaki). Wykorzystując popen oraz komendę sort posortować linie podanego pliku tekstowego (posortowane linie mają być wypisane na ekran).
+## Zadanie 3 (40%)
 W problemie producenta i konsumenta występują dwa rodzaje procesów, które dzielą wspólny bufor dla produkowanych i konsumowanych   jednostek. Zadaniem producenta jest wytworzenie surowca, umieszczenie go w buforze i rozpoczęcie pracy od nowa. Konsument pobiera   surowiec z bufora i wykorzystuje go.  
   
 Przy pomocy potoków nazwanych zaimplementować problem Producenta i Konsumenta. Napisać dwa niezależne programy - Producent oraz   Konsument, które będą komunikować się poprzez potok nazwany (kolejkę FIFO). Do potoku pisać będzie wiele procesów wykonujących program   Producenta, a czytał będzie z niej jeden proces Konsumenta. Dla zademonstrowania, że nie doszło do utraty ani zwielokrotnienia towaru   surowiec będzie pobierany z pliku przez Producenta i umieszczany w innym pliku przez Konsumenta.  
