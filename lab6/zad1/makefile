@@ -3,9 +3,10 @@ CC = gcc
 FLAGS = -std=c99 -Wall
 
 all:
+	make clean
 	make server
 	./server
-	make clean
+	
 server:
 	$(CC) $(FLAGS) server.c keygen.c queue.c -o server
 
