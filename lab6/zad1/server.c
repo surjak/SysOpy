@@ -79,9 +79,11 @@ void handle_sigint(int sig)
 
 void handle_init(message *mess)
 {
+
     key_t key;
-    scanf(mess->text, "%d", &key);
+    sscanf(mess->text, "%d", &key);
     int client_id = find_client_id();
+    printf("%d\n", key);
     if (client_id != -1)
     {
         if ((clients[client_id] = get_queue(key)) == -1)
@@ -137,7 +139,6 @@ int main()
             }
             continue;
         }
-        printf("alalalal\n");
         switch (message.type)
         {
         case TYPE_INIT:

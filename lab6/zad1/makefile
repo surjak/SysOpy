@@ -14,4 +14,4 @@ client:
 	$(CC) $(FLAGS) client.c keygen.c queue.c -o client
 
 clean:
-	rm server
+	rm server client
