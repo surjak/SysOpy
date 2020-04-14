@@ -20,7 +20,7 @@
 int queue;
 
 int clients[MAX_CLIENTS];
-int clients_friends[MAX_CLIENTS][MAX_CLIENTS];
+int clients_friends[MAX_CLIENTS][2];
 
 int num_clients = 0;
 int clients_tab_size = 0;
@@ -116,10 +116,26 @@ void init()
     for (int i = 0; i < MAX_CLIENTS; ++i)
     {
         clients[i] = -1;
-        for (int j = 0; j < MAX_CLIENTS; ++j)
+        for (int j = 0; j < 2; ++j)
         {
             clients_friends[i][j] = 0;
         }
+    }
+}
+
+void handle_stop(message_t *message)
+{
+    int client_id = message->id;
+    if (close_queue(clients[client_id]) == -1)
+    {
+        perror("cant close client queue\n");
+    }
+    clients[client_id] = -1;
+    num_clients--;
+    printf("client: %d stops, clients left: %d\n", client_id, num_clients);
+    if (num_clients == 0 && stops == 1)
+    {
+        exit(0);
     }
 }
 
@@ -164,6 +180,11 @@ int main(int argc, char *argv[])
         case TYPE_INIT:
         {
             handle_init(&message);
+            break;
+        }
+        case TYPE_STOP:
+        {
+            handle_stop(&message);
             break;
         }
         default:
