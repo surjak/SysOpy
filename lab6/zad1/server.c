@@ -11,64 +11,51 @@
 #include "keygen.h"
 #include "message.h"
 #include "types.h"
-#include "queue.h"
+#include "que.h"
+#include "utils.h"
 
 #define MAX_CLIENTS 128
+#define MAX_GROUP 32
+
+int queue;
 
 int clients[MAX_CLIENTS];
-int queue;
+int clients_friends[MAX_CLIENTS][MAX_CLIENTS];
 
 int num_clients = 0;
 int clients_tab_size = 0;
 
 int stops = 0;
+
 void clean()
 {
     delete_queue(queue, get_public_key());
 }
 
-void send_private(int client_id, message *message)
+void send_private(unsigned int client_id, message_t *message)
 {
     if (client_id >= clients_tab_size || clients[client_id] == -1)
     {
-        fprintf(stderr, "wrong client\n");
+        fprintf(stderr, "wrong client!\n");
         return;
     }
-    if (send(clients[client_id], message) == -1)
+    if ((send(clients[client_id], message) == -1))
     {
         perror("unable to send private message");
     }
 }
 
-int find_client_id()
-{
-    if (clients_tab_size < MAX_CLIENTS)
-    {
-        num_clients++;
-        return clients_tab_size++;
-    }
-    for (int i = 0; i < MAX_CLIENTS; i++)
-    {
-        if (clients[i] == -1)
-        {
-            num_clients++;
-            return i;
-        }
-    }
-    return -1;
-}
-
 void handle_sigint(int sig)
 {
-    printf("Server received SIGINT\n");
     stops = 1;
     if (num_clients == 0)
     {
         exit(0);
     }
-    message message;
+
+    message_t message;
     message.type = TYPE_STOP;
-    for (int i = 0; i < clients_tab_size; i++)
+    for (int i = 0; i < clients_tab_size; ++i)
     {
         if (clients[i] != -1)
         {
@@ -77,24 +64,46 @@ void handle_sigint(int sig)
     }
 }
 
-void handle_init(message *mess)
+int find_cliend_id()
 {
 
-    key_t key;
-    sscanf(mess->text, "%d", &key);
-    int client_id = find_client_id();
-    printf("%d\n", key);
-    if (client_id != -1)
+    if (clients_tab_size < MAX_CLIENTS)
     {
-        if ((clients[client_id] = get_queue(key)) == -1)
+        num_clients++;
+        return clients_tab_size++;
+    }
+    for (int i = 0; i < MAX_CLIENTS; ++i)
+    {
+        if (clients[i] == -1)
         {
-            perror("can't open client private queue");
+            num_clients++;
+            return i;
         }
-        message message;
+    }
+
+    return -1;
+}
+
+void handle_init(message_t *msg)
+{
+    key_t key;
+    sscanf(msg->text, "%d", &key);
+
+    int cl_id = find_cliend_id();
+    if (cl_id != -1)
+    {
+        if ((clients[cl_id] = get_queue(key)) == -1)
+        {
+            perror("cant open client private queue");
+        }
+
+        message_t message;
         message.type = TYPE_INIT;
-        message.id = client_id;
-        send_private(client_id, &message);
-        printf("sent register confirmation for client: %d\n", client_id);
+        message.id = cl_id;
+
+        send_private(cl_id, &message);
+
+        printf("sent register confirmation for client: %d\n", cl_id);
     }
     else
     {
@@ -102,23 +111,32 @@ void handle_init(message *mess)
     }
 }
 
-void empty_clients()
+void init()
 {
-    for (int i = 0; i < MAX_CLIENTS; i++)
+    for (int i = 0; i < MAX_CLIENTS; ++i)
     {
         clients[i] = -1;
+        for (int j = 0; j < MAX_CLIENTS; ++j)
+        {
+            clients_friends[i][j] = 0;
+        }
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    empty_clients();
+
+    init();
+
     atexit(clean);
+
     struct sigaction sa;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     sa.sa_handler = handle_sigint;
+
     sigaction(SIGINT, &sa, NULL);
+
     key_t key = get_public_key();
     if ((queue = create_queue(key)) == -1)
     {
@@ -126,29 +144,35 @@ int main()
         exit(1);
     }
 
-    message message;
+    message_t message;
+
     while (1)
     {
         if (receive(queue, &message) == -1)
         {
-            printf("Can't receive \n");
+            printf("cant receive\n");
             if (errno != EINTR)
             {
-                perror("can't receive message");
+                perror("cant receive message");
                 exit(1);
             }
+
             continue;
         }
         switch (message.type)
         {
         case TYPE_INIT:
+        {
             handle_init(&message);
             break;
-
+        }
         default:
+        {
             fprintf(stderr, "wrong type\n");
             break;
         }
+        }
     }
+
     return 0;
 }

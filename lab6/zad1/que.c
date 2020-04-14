@@ -4,15 +4,16 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+
 #include "message.h"
 #include "types.h"
 
-int send(int queue, message *message)
+int send(int queue, message_t *message)
 {
     return msgsnd(queue, message, MAX_MESSAGE_SIZE, 0);
 }
 
-int receive(int queue, message *message)
+int receive(int queue, message_t *message)
 {
     return msgrcv(queue, message, MAX_MESSAGE_SIZE, -TYPE_LAST, 0);
 }

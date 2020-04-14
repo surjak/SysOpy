@@ -1,18 +1,18 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
-#include <time.h>
-#define MESSAGE_SIZE 1024
 
-typedef struct
+#define MESSAGE_BUFFER_SIZE 1024
+
+typedef struct message_t
 {
     long type;
     time_t timestamp;
     int id;
-    char text[MESSAGE_SIZE];
-} message;
+    char text[MESSAGE_BUFFER_SIZE];
+} message_t;
 
-#define MAX_MESSAGE_SIZE sizeof(message) - sizeof(long)
-#define All_MESSAGE_SIZE sizeof(message)
+#define MAX_MESSAGE_SIZE sizeof(message_t) - sizeof(long)
+#define ALL_MESSAGE_SIZE sizeof(message_t)
 #define MAX_MESSAGES 10
 
 #endif

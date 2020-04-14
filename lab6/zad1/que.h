@@ -3,9 +3,9 @@
 
 #include "message.h"
 
-int send(int queue, message *message);
+int send(int queue, message_t *message);
 
-int receive(int queue, message *message);
+int receive(int queue, message_t *message);
 
 int create_queue(int key);
 
