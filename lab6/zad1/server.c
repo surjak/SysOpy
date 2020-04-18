@@ -142,11 +142,16 @@ void handle_stop(message_t *message)
 }
 void handle_list(message_t *message)
 {
+    int client_id = message->id;
     printf("Server - handle list\n");
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
         if (clients_friends[i][0] >= 0)
         {
+            if (i == client_id)
+            {
+                printf("It's you: %d   ", i);
+            }
             if (clients_friends[i][1] == -1)
             {
                 printf("Client %d is available to connect\n", i);
@@ -167,15 +172,19 @@ void handle_connect(message_t *message)
     sscanf(message->text, "%d", &connect_id);
     if (client_id == connect_id)
     {
-        printf("You can't connect with youself");
+        printf("You can't connect with youself\n");
+        message_t mess;
+        mess.type = TYPE_CONNECT;
+        sprintf(mess.text, "%d", -1);
+        send_private(client_id, &mess);
+        printf("Can't connect to client: %d\n", connect_id);
         return;
     }
     printf("Received from %d, wants to connect %d\n", client_id, connect_id);
-    clients_friends[client_id][1] = connect_id;
-    clients_friends[connect_id][1] = client_id;
+
     message_t mess;
     mess.type = TYPE_CONNECT;
-    if (clients[connect_id] != -1 || clients_friends[connect_id][1] != -1)
+    if (clients[connect_id] != -1 && clients_friends[connect_id][1] == -1)
     {
         sprintf(mess.text, "%d", clients[connect_id]);
     }
@@ -183,9 +192,11 @@ void handle_connect(message_t *message)
     {
         sprintf(mess.text, "%d", -1);
         send_private(client_id, &mess);
-        printf("sent connect confirmation for client: %d\n", client_id);
+        printf("Can't connect to client: %d\n", connect_id);
         return;
     }
+    clients_friends[client_id][1] = connect_id;
+    clients_friends[connect_id][1] = client_id;
 
     send_private(client_id, &mess);
     sprintf(mess.text, "%d", clients[client_id]);

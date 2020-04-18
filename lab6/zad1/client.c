@@ -14,7 +14,7 @@
 #include "que.h"
 #include "utils.h"
 
-int server_queue, private_queue, friend_queue = NULL;
+int server_queue, private_queue, friend_queue = -1;
 int id;
 
 int sender_pid = 0;
@@ -60,17 +60,17 @@ void handle_list()
     message.id = id;
     printf("Client - handle list\n");
     send_to_server(&message);
-    printf("Send to server\n");
+    printf("Sent to server\n");
 }
 void handle_connect(int connect_id)
 {
-    printf("Client %d wants to connect %d", id, connect_id);
+    printf("Client %d wants to connect %d\n", id, connect_id);
     message_t message;
     message.type = TYPE_CONNECT;
     message.id = id;
     sprintf(message.text, "%d", connect_id);
     send_to_server(&message);
-    printf("Send to server\n");
+    printf("Sent to server\n");
 }
 
 void sender_handle_line(char *command, char *rest)
@@ -132,6 +132,13 @@ void handle_connect_from_server(message_t *message)
     int friend;
     sscanf(message->text, "%d", &friend);
     printf("Friend Queue: %d\n", friend);
+    if (friend != -1)
+    {
+        friend_queue = friend;
+        printf("CONENCT with %d\n", friend_queue);
+        return;
+    }
+    printf("CAN'T CONENCT with\n");
 }
 
 void catcher()
