@@ -18,9 +18,10 @@
 int server_queue, private_queue;
 int friend_queue = -1;
 int id;
-
-int sender_pid = 0;
-
+int chat_fork;
+int friend_pid = 0;
+void catcher();
+void catcher_chat();
 void send_to_server(message_t *message)
 {
     if (send(server_queue, message))
@@ -30,7 +31,7 @@ void send_to_server(message_t *message)
 }
 void send_to_friend(message_t *message)
 {
-    printf("%d   PID:  %d\n", friend_queue, getpid());
+    printf("%d MY_PID:  %d\n", friend_queue, getpid());
     if (send(friend_queue, message) == -1)
     {
         perror("unable to send message to friend");
@@ -38,18 +39,15 @@ void send_to_friend(message_t *message)
 }
 void clean()
 {
-    if (sender_pid != 0)
-    {
-        message_t message;
-        message.type = TYPE_STOP;
-        message.id = id;
 
-        send_to_server(&message);
+    message_t message;
+    message.type = TYPE_STOP;
+    message.id = id;
 
-        kill(sender_pid, SIGKILL);
-        close_queue(server_queue);
-        delete_queue(private_queue, get_private_key());
-    }
+    send_to_server(&message);
+    close_queue(server_queue);
+    delete_queue(private_queue, get_private_key());
+    kill(chat_fork, SIGKILL);
 }
 
 void handle_sigint(int sig)
@@ -59,7 +57,7 @@ void handle_sigint(int sig)
 
 void hanlde_stop()
 {
-    kill(getppid(), SIGINT);
+    kill(getpid(), SIGINT);
 }
 
 void handle_list()
@@ -67,9 +65,7 @@ void handle_list()
     message_t message;
     message.type = TYPE_LIST;
     message.id = id;
-    printf("Client - handle list\n");
     send_to_server(&message);
-    printf("Sent to server\n");
 }
 void handle_connect(int connect_id)
 {
@@ -82,12 +78,12 @@ void handle_connect(int connect_id)
 }
 void handle_message_send(char *mess)
 {
-    printf("%s\n", mess);
     message_t message;
     message.type = TYPE_MESSAGE;
     message.id = id;
     send_to_friend(&message);
-    printf("PID: %d", getpid());
+    // kill(friend_pid, SOMETHING_HAPPEND);
+    // printf("PID: %d", getpid());
 }
 
 void sender_handle_line(char *command, char *rest)
@@ -110,7 +106,7 @@ void sender_handle_line(char *command, char *rest)
         handle_message_send(rest);
     }
 }
-int catcher_pid;
+
 void initialize()
 {
     if ((server_queue = get_queue(get_public_key())) == -1)
@@ -129,6 +125,7 @@ void initialize()
     message_t message;
     message.type = TYPE_INIT;
     sprintf(message.text, "%d", private_key);
+    message.pid = getpid();
 
     if (send(server_queue, &message) == -1)
     {
@@ -152,25 +149,26 @@ void sender()
     char command[256];
     char rest[256];
 
-    while (1)
-    {
-        fgets(line, 1024, stdin);
-        separate_command(line, command, rest);
-        sender_handle_line(command, rest);
-    }
+    fgets(line, 1024, stdin);
+    separate_command(line, command, rest);
+    sender_handle_line(command, rest);
 }
 
 void handle_connect_from_server(message_t *message)
 {
-    printf("Received CONNECT\n");
 
     int friend;
     sscanf(message->text, "%d", &friend);
-    printf("Friend Queue: %d\n", friend);
     if (friend != -1)
     {
         friend_queue = friend;
         printf("CONENCT with %d\n", friend_queue);
+        friend_pid = message->pid;
+
+        if ((chat_fork = fork()) == 0)
+        {
+            catcher_chat();
+        }
         return;
     }
     printf("CAN'T CONENCT with\n");
@@ -182,9 +180,46 @@ void handle_message(message_t *message)
 
 void catcher()
 {
-    message_t message;
+    // signal(SOMETHING_HAPPEND, catcher);
+    signal(SIGINT, handle_sigint);
+
+    while (!isQueueEmpty(private_queue))
+    {
+        message_t message;
+
+        if (receive_no_wait(private_queue, &message) != -1)
+        {
+            printf("------\n");
+            switch (message.type)
+            {
+            case TYPE_STOP:
+                printf("exiting\n");
+                exit(0);
+                break;
+            case TYPE_CONNECT:
+                handle_connect_from_server(&message);
+                break;
+            case TYPE_MESSAGE:
+                handle_message(&message);
+                break;
+            default:
+                break;
+            }
+
+            printf("------\n");
+        }
+    }
+}
+void catcher_chat()
+{
+    // signal(SOMETHING_HAPPEND, catcher);
+    signal(SIGINT, handle_sigint);
+    printf("CATCHING");
+
     while (1)
     {
+        message_t message;
+
         if (receive(private_queue, &message) == -1)
         {
             if (errno != EINTR)
@@ -213,38 +248,24 @@ void catcher()
         printf("------\n");
     }
 }
-
 int main(int argc, char *argv[])
 {
     atexit(clean);
-
+    signal(SOMETHING_HAPPEND, catcher);
+    signal(SIGINT, handle_sigint);
     initialize();
-
-    sender_pid = fork();
-    if (sender_pid == -1)
+    struct sigaction sa;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = catcher;
+    sigaction(SOMETHING_HAPPEND, &sa, NULL);
+    while (1)
     {
-        perror("cant fork");
-        exit(1);
-    }
-    else if (sender_pid == 0)
-    {
-        struct sigaction sa;
-        sigemptyset(&sa.sa_mask);
-        sa.sa_flags = 0;
-        sa.sa_handler = SIG_IGN;
-        sigaction(SIGINT, &sa, NULL);
 
+        // char buffer[256];
+        // fgets(buffer, 1024, stdin);
+        // sender(buffer);
         sender();
-    }
-    else
-    {
-
-        struct sigaction sa;
-        sigemptyset(&sa.sa_mask);
-        sa.sa_flags = 0;
-        sa.sa_handler = handle_sigint;
-        sigaction(SIGINT, &sa, NULL);
-
         catcher();
     }
 
