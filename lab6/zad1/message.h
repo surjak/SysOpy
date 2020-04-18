@@ -9,6 +9,7 @@ typedef struct message_t
     time_t timestamp;
     int id;
     char text[MESSAGE_BUFFER_SIZE];
+    int pid;
 } message_t;
 
 #define MAX_MESSAGE_SIZE sizeof(message_t) - sizeof(long)

@@ -19,7 +19,7 @@
 
 int queue;
 
-int clients[MAX_CLIENTS];
+int clients[MAX_CLIENTS][2];
 int clients_friends[MAX_CLIENTS][2];
 
 int num_clients = 0;
@@ -34,12 +34,12 @@ void clean()
 
 void send_private(unsigned int client_id, message_t *message)
 {
-    if (client_id >= clients_tab_size || clients[client_id] == -1)
+    if (client_id >= clients_tab_size || clients[client_id][0] == -1)
     {
         fprintf(stderr, "wrong client!\n");
         return;
     }
-    if ((send(clients[client_id], message) == -1))
+    if ((send(clients[client_id][0], message) == -1))
     {
         perror("unable to send private message");
     }
@@ -57,9 +57,10 @@ void handle_sigint(int sig)
     message.type = TYPE_STOP;
     for (int i = 0; i < clients_tab_size; ++i)
     {
-        if (clients[i] != -1)
+        if (clients[i][0] != -1)
         {
             send_private(i, &message);
+            kill(clients[i][1], SOMETHING_HAPPEND);
         }
     }
 }
@@ -74,7 +75,7 @@ int find_cliend_id()
     }
     for (int i = 0; i < MAX_CLIENTS; ++i)
     {
-        if (clients[i] == -1)
+        if (clients[i][0] == -1)
         {
             num_clients++;
             return i;
@@ -88,14 +89,19 @@ void handle_init(message_t *msg)
 {
     key_t key;
     sscanf(msg->text, "%d", &key);
+    int pid = msg->pid;
 
     int cl_id = find_cliend_id();
     if (cl_id != -1)
     {
-        if ((clients[cl_id] = get_queue(key)) == -1)
+        if ((clients[cl_id][0] = get_queue(key)) == -1)
         {
+
             perror("cant open client private queue");
         }
+
+        clients[cl_id][1] = pid;
+        clients_friends[cl_id][0] = cl_id;
 
         message_t message;
         message.type = TYPE_INIT;
@@ -115,10 +121,10 @@ void init()
 {
     for (int i = 0; i < MAX_CLIENTS; ++i)
     {
-        clients[i] = -1;
+        clients[i][0] = -1;
         for (int j = 0; j < 2; ++j)
         {
-            clients_friends[i][j] = 0;
+            clients_friends[i][j] = -1;
         }
     }
 }
@@ -126,17 +132,102 @@ void init()
 void handle_stop(message_t *message)
 {
     int client_id = message->id;
-    if (close_queue(clients[client_id]) == -1)
+    if (close_queue(clients[client_id][0]) == -1)
     {
         perror("cant close client queue\n");
     }
-    clients[client_id] = -1;
+    int friend = clients_friends[client_id][1];
+    clients_friends[client_id][0] = -1;
+    clients_friends[client_id][1] = -1;
+    if (friend != -1)
+    {
+        clients_friends[friend][1] = -1;
+    }
+    clients[client_id][0] = -1;
     num_clients--;
     printf("client: %d stops, clients left: %d\n", client_id, num_clients);
     if (num_clients == 0 && stops == 1)
     {
         exit(0);
     }
+}
+void handle_list(message_t *message)
+{
+    int client_id = message->id;
+    for (int i = 0; i < MAX_CLIENTS; i++)
+    {
+        if (clients_friends[i][0] >= 0)
+        {
+            if (i == client_id)
+            {
+                if (clients_friends[i][1] == -1)
+                {
+                    printf("Client %d is available to connect (Me)\n", i);
+                }
+                else
+                {
+                    printf("Client %d is making a conversation right now (Me)\n", i);
+                }
+                continue;
+            }
+            if (clients_friends[i][1] == -1)
+            {
+                printf("Client %d is available to connect\n", i);
+            }
+            else
+            {
+                printf("Client %d is making a conversation right now\n", i);
+            }
+        }
+    }
+}
+
+void handle_connect(message_t *message)
+{
+    int client_id = message->id;
+    int connect_id;
+
+    sscanf(message->text, "%d", &connect_id);
+    if (client_id == connect_id)
+    {
+        printf("You can't connect with youself\n");
+        message_t mess;
+        mess.type = TYPE_CONNECT;
+        sprintf(mess.text, "%d", -1);
+        send_private(client_id, &mess);
+        return;
+    }
+
+    message_t mess;
+    mess.type = TYPE_CONNECT;
+    if (clients[connect_id][0] != -1 && clients_friends[connect_id][1] == -1)
+    {
+        sprintf(mess.text, "%d", clients[connect_id][0]);
+    }
+    else
+    {
+        sprintf(mess.text, "%d", -1);
+        send_private(client_id, &mess);
+        printf("Can't connect to client: %d\n", connect_id);
+        return;
+    }
+    clients_friends[client_id][1] = connect_id;
+    clients_friends[connect_id][1] = client_id;
+    mess.pid = clients[connect_id][1];
+    send_private(client_id, &mess);
+    sprintf(mess.text, "%d", clients[client_id][0]);
+    mess.pid = clients[client_id][1];
+    send_private(connect_id, &mess);
+    printf("sent connect confirmation for clients: %d, %d\n", client_id, connect_id);
+}
+void handle_disconnect(message_t *message)
+{
+
+    int client_id = message->id;
+    int second_client = clients_friends[client_id][1];
+    printf("Disconnecting client %d and %d\n", client_id, second_client);
+    clients_friends[client_id][1] = -1;
+    clients_friends[second_client][1] = -1;
 }
 
 int main(int argc, char *argv[])
@@ -177,16 +268,33 @@ int main(int argc, char *argv[])
         }
         switch (message.type)
         {
-        case TYPE_INIT:
-        {
-            handle_init(&message);
-            break;
-        }
+
         case TYPE_STOP:
         {
             handle_stop(&message);
             break;
         }
+        case TYPE_DISCONNECT:
+        {
+            handle_disconnect(&message);
+            break;
+        }
+        case TYPE_LIST:
+        {
+            handle_list(&message);
+            break;
+        }
+        case TYPE_INIT:
+        {
+            handle_init(&message);
+            break;
+        }
+        case TYPE_CONNECT:
+        {
+            handle_connect(&message);
+            break;
+        }
+
         default:
         {
             fprintf(stderr, "wrong type\n");
