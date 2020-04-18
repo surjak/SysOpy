@@ -159,6 +159,30 @@ void handle_list(message_t *message)
     }
 }
 
+void handle_connect(message_t *message)
+{
+    int client_id = message->id;
+    int connect_id;
+    sscanf(message->text, "%d", &connect_id);
+
+    printf("Received from %d, wants to connect %d\n", client_id, connect_id);
+
+    message_t mess;
+    mess.type = TYPE_CONNECT;
+    if (clients[connect_id] != -1)
+    {
+        sprintf(mess.text, "%d", clients[connect_id]);
+    }
+    else
+    {
+        sprintf(mess.text, "%d", -1);
+    }
+
+    send_private(client_id, &mess);
+
+    printf("sent connect confirmation for client: %d\n", client_id);
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -210,6 +234,11 @@ int main(int argc, char *argv[])
         case TYPE_LIST:
         {
             handle_list(&message);
+            break;
+        }
+        case TYPE_CONNECT:
+        {
+            handle_connect(&message);
             break;
         }
         default:

@@ -15,7 +15,7 @@ int send(int queue, message_t *message)
 
 int receive(int queue, message_t *message)
 {
-    return msgrcv(queue, message, MAX_MESSAGE_SIZE, -TYPE_INIT, 0);
+    return msgrcv(queue, message, MAX_MESSAGE_SIZE, -100, 0);
 }
 
 int create_queue(int key)

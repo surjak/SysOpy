@@ -14,7 +14,7 @@
 #include "que.h"
 #include "utils.h"
 
-int server_queue, private_queue;
+int server_queue, private_queue, friend_queue = NULL;
 int id;
 
 int sender_pid = 0;
@@ -62,6 +62,16 @@ void handle_list()
     send_to_server(&message);
     printf("Send to server\n");
 }
+void handle_connect(int connect_id)
+{
+    printf("Client %d wants to connect %d", id, connect_id);
+    message_t message;
+    message.type = TYPE_CONNECT;
+    message.id = id;
+    sprintf(message.text, "%d", connect_id);
+    send_to_server(&message);
+    printf("Send to server\n");
+}
 
 void sender_handle_line(char *command, char *rest)
 {
@@ -73,6 +83,10 @@ void sender_handle_line(char *command, char *rest)
     else if (strcmp("LIST", command) == 0)
     {
         handle_list();
+    }
+    else if (strcmp("CONNECT", command) == 0)
+    {
+        handle_connect(atoi(rest));
     }
 }
 
@@ -110,6 +124,16 @@ void initialize()
     id = message.id;
     printf("successfully registered with id %d\n", id);
 }
+
+void handle_connect_from_server(message_t *message)
+{
+    printf("Received CONNECT\n");
+
+    int friend;
+    sscanf(message->text, "%d", &friend);
+    printf("Friend Queue: %d\n", friend);
+}
+
 void catcher()
 {
     message_t message;
@@ -129,6 +153,9 @@ void catcher()
         case TYPE_STOP:
             printf("exiting\n");
             exit(0);
+            break;
+        case TYPE_CONNECT:
+            handle_connect_from_server(&message);
             break;
         default:
             break;
