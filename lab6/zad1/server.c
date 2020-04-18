@@ -94,8 +94,10 @@ void handle_init(message_t *msg)
     {
         if ((clients[cl_id] = get_queue(key)) == -1)
         {
+
             perror("cant open client private queue");
         }
+        clients_friends[cl_id][0] = cl_id;
 
         message_t message;
         message.type = TYPE_INIT;
@@ -118,7 +120,7 @@ void init()
         clients[i] = -1;
         for (int j = 0; j < 2; ++j)
         {
-            clients_friends[i][j] = 0;
+            clients_friends[i][j] = -1;
         }
     }
 }
@@ -136,6 +138,24 @@ void handle_stop(message_t *message)
     if (num_clients == 0 && stops == 1)
     {
         exit(0);
+    }
+}
+void handle_list(message_t *message)
+{
+    printf("Server - handle list\n");
+    for (int i = 0; i < MAX_CLIENTS; i++)
+    {
+        if (clients_friends[i][0] >= 0)
+        {
+            if (clients_friends[i][1] == -1)
+            {
+                printf("Client %d is available to connect\n", i);
+            }
+            else
+            {
+                printf("Client %d make a conversation right now\n", i);
+            }
+        }
     }
 }
 
@@ -185,6 +205,11 @@ int main(int argc, char *argv[])
         case TYPE_STOP:
         {
             handle_stop(&message);
+            break;
+        }
+        case TYPE_LIST:
+        {
+            handle_list(&message);
             break;
         }
         default:

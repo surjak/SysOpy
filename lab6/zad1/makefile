@@ -1,7 +1,9 @@
 CC = gcc
 FLAGS = -std=c99 -Wall
 
-.PHONY: server client
+all:
+	make server
+	make client
 
 server:
 	$(CC) $(FLAGS) server.c keygen.c que.c utils.c -o server
