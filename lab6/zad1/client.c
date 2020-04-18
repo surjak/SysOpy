@@ -53,12 +53,26 @@ void hanlde_stop()
     kill(getppid(), SIGINT);
 }
 
+void handle_list()
+{
+    message_t message;
+    message.type = TYPE_LIST;
+    message.id = id;
+    printf("Client - handle list\n");
+    send_to_server(&message);
+    printf("Send to server\n");
+}
+
 void sender_handle_line(char *command, char *rest)
 {
 
     if (strcmp("STOP", command) == 0)
     {
         hanlde_stop();
+    }
+    else if (strcmp("LIST", command) == 0)
+    {
+        handle_list();
     }
 }
 
