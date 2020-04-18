@@ -163,24 +163,35 @@ void handle_connect(message_t *message)
 {
     int client_id = message->id;
     int connect_id;
+
     sscanf(message->text, "%d", &connect_id);
-
+    if (client_id == connect_id)
+    {
+        printf("You can't connect with youself");
+        return;
+    }
     printf("Received from %d, wants to connect %d\n", client_id, connect_id);
-
+    clients_friends[client_id][1] = connect_id;
+    clients_friends[connect_id][1] = client_id;
     message_t mess;
     mess.type = TYPE_CONNECT;
-    if (clients[connect_id] != -1)
+    if (clients[connect_id] != -1 || clients_friends[connect_id][1] != -1)
     {
         sprintf(mess.text, "%d", clients[connect_id]);
     }
     else
     {
         sprintf(mess.text, "%d", -1);
+        send_private(client_id, &mess);
+        printf("sent connect confirmation for client: %d\n", client_id);
+        return;
     }
 
     send_private(client_id, &mess);
-
+    sprintf(mess.text, "%d", clients[client_id]);
+    send_private(connect_id, &mess);
     printf("sent connect confirmation for client: %d\n", client_id);
+    printf("sent connect confirmation for client: %d\n", connect_id);
 }
 
 int main(int argc, char *argv[])

@@ -2,6 +2,7 @@ CC = gcc
 FLAGS = -std=c99 -Wall
 
 all:
+	make clean
 	make server
 	make client
 
