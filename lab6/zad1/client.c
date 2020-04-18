@@ -19,8 +19,6 @@ int server_queue, private_queue;
 int friend_queue = -1;
 int id;
 
-int friend_pid = 0;
-
 void send_to_server(message_t *message)
 {
     if (send(server_queue, message))
@@ -44,6 +42,13 @@ void clean()
     send_to_server(&message);
     close_queue(server_queue);
     delete_queue(private_queue, get_private_key());
+    if (friend_queue != -1)
+    {
+        message_t message;
+        message.type = TYPE_DISCONNECT;
+        message.id = id;
+        send_to_friend(&message);
+    }
 }
 
 void handle_sigint(int sig)
@@ -177,7 +182,6 @@ void handle_connect_from_server(message_t *message)
     {
         friend_queue = friend;
         printf("CONENCT with %d\n", friend_queue);
-        friend_pid = message->pid;
         printf("_____WELCOME IN CHAT_____\n");
         return;
     }

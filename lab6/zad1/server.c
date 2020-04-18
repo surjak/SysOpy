@@ -136,6 +136,13 @@ void handle_stop(message_t *message)
     {
         perror("cant close client queue\n");
     }
+    int friend = clients_friends[client_id][1];
+    clients_friends[client_id][0] = -1;
+    clients_friends[client_id][1] = -1;
+    if (friend != -1)
+    {
+        clients_friends[friend][1] = -1;
+    }
     clients[client_id][0] = -1;
     num_clients--;
     printf("client: %d stops, clients left: %d\n", client_id, num_clients);
@@ -261,24 +268,10 @@ int main(int argc, char *argv[])
         }
         switch (message.type)
         {
-        case TYPE_INIT:
-        {
-            handle_init(&message);
-            break;
-        }
+
         case TYPE_STOP:
         {
             handle_stop(&message);
-            break;
-        }
-        case TYPE_LIST:
-        {
-            handle_list(&message);
-            break;
-        }
-        case TYPE_CONNECT:
-        {
-            handle_connect(&message);
             break;
         }
         case TYPE_DISCONNECT:
@@ -286,6 +279,22 @@ int main(int argc, char *argv[])
             handle_disconnect(&message);
             break;
         }
+        case TYPE_LIST:
+        {
+            handle_list(&message);
+            break;
+        }
+        case TYPE_INIT:
+        {
+            handle_init(&message);
+            break;
+        }
+        case TYPE_CONNECT:
+        {
+            handle_connect(&message);
+            break;
+        }
+
         default:
         {
             fprintf(stderr, "wrong type\n");
