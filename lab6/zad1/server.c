@@ -99,7 +99,7 @@ void handle_init(message_t *msg)
 
             perror("cant open client private queue");
         }
-        printf("CLIENT queue: %d\n", clients[cl_id][0]);
+
         clients[cl_id][1] = pid;
         clients_friends[cl_id][0] = cl_id;
 
@@ -147,7 +147,6 @@ void handle_stop(message_t *message)
 void handle_list(message_t *message)
 {
     int client_id = message->id;
-    printf("Server - handle list\n");
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
         if (clients_friends[i][0] >= 0)
@@ -160,7 +159,7 @@ void handle_list(message_t *message)
                 }
                 else
                 {
-                    printf("Client %d make a conversation right now (Me)\n", i);
+                    printf("Client %d is making a conversation right now (Me)\n", i);
                 }
                 continue;
             }
@@ -170,7 +169,7 @@ void handle_list(message_t *message)
             }
             else
             {
-                printf("Client %d make a conversation right now\n", i);
+                printf("Client %d is making a conversation right now\n", i);
             }
         }
     }
@@ -189,10 +188,8 @@ void handle_connect(message_t *message)
         mess.type = TYPE_CONNECT;
         sprintf(mess.text, "%d", -1);
         send_private(client_id, &mess);
-        // printf("Can't connect to client: %d\n", connect_id);
         return;
     }
-    printf("Received from %d, wants to connect %d\n", client_id, connect_id);
 
     message_t mess;
     mess.type = TYPE_CONNECT;
@@ -214,17 +211,14 @@ void handle_connect(message_t *message)
     sprintf(mess.text, "%d", clients[client_id][0]);
     mess.pid = clients[client_id][1];
     send_private(connect_id, &mess);
-    printf("sent connect confirmation for client: %d\n", client_id);
-    printf("sent connect confirmation for client: %d\n", connect_id);
-    // kill(clients[client_id][1], SOMETHING_HAPPEND);
-    // kill(clients[connect_id][1], SOMETHING_HAPPEND);
+    printf("sent connect confirmation for clients: %d, %d\n", client_id, connect_id);
 }
 void handle_disconnect(message_t *message)
 {
 
     int client_id = message->id;
     int second_client = clients_friends[client_id][1];
-    printf("Disconnecting client %d and %d", client_id, second_client);
+    printf("Disconnecting client %d and %d\n", client_id, second_client);
     clients_friends[client_id][1] = -1;
     clients_friends[second_client][1] = -1;
 }

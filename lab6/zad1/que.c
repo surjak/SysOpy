@@ -15,11 +15,11 @@ int send(int queue, message_t *message)
 
 int receive(int queue, message_t *message)
 {
-    return msgrcv(queue, message, MAX_MESSAGE_SIZE, -100, 0); //last 0
+    return msgrcv(queue, message, MAX_MESSAGE_SIZE, -100, 0);
 }
 int receive_no_wait(int queue, message_t *message)
 {
-    return msgrcv(queue, message, MAX_MESSAGE_SIZE, -100, IPC_NOWAIT); //last 0
+    return msgrcv(queue, message, MAX_MESSAGE_SIZE, -100, IPC_NOWAIT);
 }
 
 int create_queue(int key)
@@ -42,7 +42,7 @@ int close_queue(int queue)
     return 0;
 }
 
-int isQueueEmpty(int queueId)
+int is_empty(int queueId)
 {
     struct msqid_ds buf;
     msgctl(queueId, IPC_STAT, &buf);

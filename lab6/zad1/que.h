@@ -24,7 +24,8 @@ int get_queue(int key);
 
 int close_queue(int queue);
 
-int isQueueEmpty(int queueId);
+int is_empty(int queueId);
+
 int receive_no_wait(int queue, message_t *message);
 
 #define SOMETHING_HAPPEND SIGRTMIN

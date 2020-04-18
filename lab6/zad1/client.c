@@ -18,10 +18,9 @@
 int server_queue, private_queue;
 int friend_queue = -1;
 int id;
-int chat_fork = -1;
+
 int friend_pid = 0;
-void catcher();
-void catcher_chat();
+
 void send_to_server(message_t *message)
 {
     if (send(server_queue, message))
@@ -38,7 +37,6 @@ void send_to_friend(message_t *message)
 }
 void clean()
 {
-
     message_t message;
     message.type = TYPE_STOP;
     message.id = id;
@@ -68,13 +66,11 @@ void handle_list()
 
 void handle_disconnect()
 {
-    // kill(chat_fork, SIGKILL);
-    // printf("KI");
+
     message_t message;
     message.type = TYPE_DISCONNECT;
     message.id = id;
     send_to_friend(&message);
-    // chat_fork = -1;
     friend_queue = -1;
     printf("DISCONNECTED");
     send_to_server(&message);
@@ -183,11 +179,6 @@ void handle_connect_from_server(message_t *message)
         printf("CONENCT with %d\n", friend_queue);
         friend_pid = message->pid;
         printf("_____WELCOME IN CHAT_____\n");
-
-        // if ((chat_fork = fork()) == 0)
-        // {
-        //     catcher_chat();
-        // }
         return;
     }
     printf("CAN'T CONENCT with\n");
@@ -204,8 +195,6 @@ void handle_message(message_t *message)
 void handle_disconnect_from_server(message_t *message)
 {
     friend_queue = -1;
-    // kill(chat_fork, SIGKILL);
-    chat_fork = -1;
     printf("DISCONNECTED");
 }
 
@@ -214,7 +203,7 @@ void catcher()
 
     signal(SIGINT, handle_sigint);
 
-    while (!isQueueEmpty(private_queue))
+    while (!is_empty(private_queue))
     {
         message_t message;
 
@@ -242,42 +231,7 @@ void catcher()
         }
     }
 }
-void catcher_chat()
-{
-    // signal(SOMETHING_HAPPEND, catcher);
-    signal(SIGINT, handle_sigint);
-    printf("_____WELCOME IN CHAT_____\n");
 
-    while (1)
-    {
-        message_t message;
-
-        if (receive(private_queue, &message) == -1)
-        {
-            if (errno != EINTR)
-            {
-                perror("cant receive message");
-                exit(1);
-            }
-        }
-
-        switch (message.type)
-        {
-        case TYPE_STOP:
-            printf("exiting\n");
-            exit(0);
-            break;
-        case TYPE_CONNECT:
-            handle_connect_from_server(&message);
-            break;
-        case TYPE_MESSAGE:
-            handle_message(&message);
-            break;
-        default:
-            break;
-        }
-    }
-}
 int main(int argc, char *argv[])
 {
     atexit(clean);
