@@ -18,7 +18,7 @@
 int server_queue, private_queue;
 int friend_queue = -1;
 int id;
-int chat_fork;
+int chat_fork = -1;
 int friend_pid = 0;
 void catcher();
 void catcher_chat();
@@ -31,7 +31,6 @@ void send_to_server(message_t *message)
 }
 void send_to_friend(message_t *message)
 {
-    printf("%d MY_PID:  %d\n", friend_queue, getpid());
     if (send(friend_queue, message) == -1)
     {
         perror("unable to send message to friend");
@@ -47,7 +46,6 @@ void clean()
     send_to_server(&message);
     close_queue(server_queue);
     delete_queue(private_queue, get_private_key());
-    kill(chat_fork, SIGKILL);
 }
 
 void handle_sigint(int sig)
@@ -67,6 +65,20 @@ void handle_list()
     message.id = id;
     send_to_server(&message);
 }
+
+void handle_disconnect()
+{
+    // kill(chat_fork, SIGKILL);
+    // printf("KI");
+    message_t message;
+    message.type = TYPE_DISCONNECT;
+    message.id = id;
+    send_to_friend(&message);
+    // chat_fork = -1;
+    friend_queue = -1;
+    printf("DISCONNECTED");
+    send_to_server(&message);
+}
 void handle_connect(int connect_id)
 {
     printf("Client %d wants to connect %d\n", id, connect_id);
@@ -81,9 +93,11 @@ void handle_message_send(char *mess)
     message_t message;
     message.type = TYPE_MESSAGE;
     message.id = id;
+    sprintf(message.text, "%s", mess);
     send_to_friend(&message);
-    // kill(friend_pid, SOMETHING_HAPPEND);
-    // printf("PID: %d", getpid());
+    printf("_________\n");
+    printf("M: %s\n", mess);
+    printf("_________\n");
 }
 
 void sender_handle_line(char *command, char *rest)
@@ -104,6 +118,10 @@ void sender_handle_line(char *command, char *rest)
     else if (strcmp("MESSAGE", command) == 0)
     {
         handle_message_send(rest);
+    }
+    else if (strcmp("DISCONNECT", command) == 0)
+    {
+        handle_disconnect();
     }
 }
 
@@ -164,23 +182,36 @@ void handle_connect_from_server(message_t *message)
         friend_queue = friend;
         printf("CONENCT with %d\n", friend_queue);
         friend_pid = message->pid;
+        printf("_____WELCOME IN CHAT_____\n");
 
-        if ((chat_fork = fork()) == 0)
-        {
-            catcher_chat();
-        }
+        // if ((chat_fork = fork()) == 0)
+        // {
+        //     catcher_chat();
+        // }
         return;
     }
     printf("CAN'T CONENCT with\n");
 }
 void handle_message(message_t *message)
 {
-    printf("Received message \n");
+    printf("_________\n");
+    char mess[256];
+    sprintf(mess, "%s", message->text);
+    printf("F: %s\n", mess);
+    printf("_________\n");
+}
+
+void handle_disconnect_from_server(message_t *message)
+{
+    friend_queue = -1;
+    // kill(chat_fork, SIGKILL);
+    chat_fork = -1;
+    printf("DISCONNECTED");
 }
 
 void catcher()
 {
-    // signal(SOMETHING_HAPPEND, catcher);
+
     signal(SIGINT, handle_sigint);
 
     while (!isQueueEmpty(private_queue))
@@ -189,7 +220,7 @@ void catcher()
 
         if (receive_no_wait(private_queue, &message) != -1)
         {
-            printf("------\n");
+
             switch (message.type)
             {
             case TYPE_STOP:
@@ -202,11 +233,12 @@ void catcher()
             case TYPE_MESSAGE:
                 handle_message(&message);
                 break;
+            case TYPE_DISCONNECT:
+                handle_disconnect_from_server(&message);
+                break;
             default:
                 break;
             }
-
-            printf("------\n");
         }
     }
 }
@@ -214,7 +246,7 @@ void catcher_chat()
 {
     // signal(SOMETHING_HAPPEND, catcher);
     signal(SIGINT, handle_sigint);
-    printf("CATCHING");
+    printf("_____WELCOME IN CHAT_____\n");
 
     while (1)
     {
@@ -228,7 +260,7 @@ void catcher_chat()
                 exit(1);
             }
         }
-        printf("------\n");
+
         switch (message.type)
         {
         case TYPE_STOP:
@@ -244,8 +276,6 @@ void catcher_chat()
         default:
             break;
         }
-
-        printf("------\n");
     }
 }
 int main(int argc, char *argv[])
@@ -262,9 +292,6 @@ int main(int argc, char *argv[])
     while (1)
     {
 
-        // char buffer[256];
-        // fgets(buffer, 1024, stdin);
-        // sender(buffer);
         sender();
         catcher();
     }

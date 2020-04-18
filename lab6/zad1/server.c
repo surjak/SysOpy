@@ -219,6 +219,15 @@ void handle_connect(message_t *message)
     // kill(clients[client_id][1], SOMETHING_HAPPEND);
     // kill(clients[connect_id][1], SOMETHING_HAPPEND);
 }
+void handle_disconnect(message_t *message)
+{
+
+    int client_id = message->id;
+    int second_client = clients_friends[client_id][1];
+    printf("Disconnecting client %d and %d", client_id, second_client);
+    clients_friends[client_id][1] = -1;
+    clients_friends[second_client][1] = -1;
+}
 
 int main(int argc, char *argv[])
 {
@@ -276,6 +285,11 @@ int main(int argc, char *argv[])
         case TYPE_CONNECT:
         {
             handle_connect(&message);
+            break;
+        }
+        case TYPE_DISCONNECT:
+        {
+            handle_disconnect(&message);
             break;
         }
         default:
