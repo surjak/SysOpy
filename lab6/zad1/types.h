@@ -6,5 +6,6 @@
 #define TYPE_LIST 3
 #define TYPE_CONNECT 4
 #define TYPE_INIT 5
+#define TYPE_MESSAGE 6
 
 #endif

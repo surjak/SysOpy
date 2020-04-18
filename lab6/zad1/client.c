@@ -7,14 +7,16 @@
 #include <string.h>
 #include <time.h>
 #include <errno.h>
-
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "keygen.h"
 #include "message.h"
 #include "types.h"
 #include "que.h"
 #include "utils.h"
 
-int server_queue, private_queue, friend_queue = -1;
+int server_queue, private_queue;
+int friend_queue = -1;
 int id;
 
 int sender_pid = 0;
@@ -26,7 +28,14 @@ void send_to_server(message_t *message)
         perror("unable to send message to server");
     }
 }
-
+void send_to_friend(message_t *message)
+{
+    printf("%d   PID:  %d\n", friend_queue, getpid());
+    if (send(friend_queue, message) == -1)
+    {
+        perror("unable to send message to friend");
+    }
+}
 void clean()
 {
     if (sender_pid != 0)
@@ -70,7 +79,15 @@ void handle_connect(int connect_id)
     message.id = id;
     sprintf(message.text, "%d", connect_id);
     send_to_server(&message);
-    printf("Sent to server\n");
+}
+void handle_message_send(char *mess)
+{
+    printf("%s\n", mess);
+    message_t message;
+    message.type = TYPE_MESSAGE;
+    message.id = id;
+    send_to_friend(&message);
+    printf("PID: %d", getpid());
 }
 
 void sender_handle_line(char *command, char *rest)
@@ -88,8 +105,12 @@ void sender_handle_line(char *command, char *rest)
     {
         handle_connect(atoi(rest));
     }
+    else if (strcmp("MESSAGE", command) == 0)
+    {
+        handle_message_send(rest);
+    }
 }
-
+int catcher_pid;
 void initialize()
 {
     if ((server_queue = get_queue(get_public_key())) == -1)
@@ -125,6 +146,20 @@ void initialize()
     printf("successfully registered with id %d\n", id);
 }
 
+void sender()
+{
+    char line[256];
+    char command[256];
+    char rest[256];
+
+    while (1)
+    {
+        fgets(line, 1024, stdin);
+        separate_command(line, command, rest);
+        sender_handle_line(command, rest);
+    }
+}
+
 void handle_connect_from_server(message_t *message)
 {
     printf("Received CONNECT\n");
@@ -139,6 +174,10 @@ void handle_connect_from_server(message_t *message)
         return;
     }
     printf("CAN'T CONENCT with\n");
+}
+void handle_message(message_t *message)
+{
+    printf("Received message \n");
 }
 
 void catcher()
@@ -164,25 +203,14 @@ void catcher()
         case TYPE_CONNECT:
             handle_connect_from_server(&message);
             break;
+        case TYPE_MESSAGE:
+            handle_message(&message);
+            break;
         default:
             break;
         }
 
         printf("------\n");
-    }
-}
-
-void sender()
-{
-    char line[256];
-    char command[256];
-    char rest[256];
-
-    while (1)
-    {
-        fgets(line, 1024, stdin);
-        separate_command(line, command, rest);
-        sender_handle_line(command, rest);
     }
 }
 
@@ -210,6 +238,7 @@ int main(int argc, char *argv[])
     }
     else
     {
+
         struct sigaction sa;
         sigemptyset(&sa.sa_mask);
         sa.sa_flags = 0;

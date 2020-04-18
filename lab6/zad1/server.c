@@ -97,6 +97,7 @@ void handle_init(message_t *msg)
 
             perror("cant open client private queue");
         }
+        printf("CLIENT queue: %d\n", clients[cl_id]);
         clients_friends[cl_id][0] = cl_id;
 
         message_t message;
