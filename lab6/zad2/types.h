@@ -43,3 +43,5 @@ void send_message(int queue, char mess[MAX_MESSAGE_LENGHT], int type);
 void receive_message(int queue, char *mess, int *type);
 char *concat(const char *s1, const char *s2);
 char *random_name(int length);
+void register_notif(int queue, struct sigevent *ev);
+int equals(char *str1, char *str2);

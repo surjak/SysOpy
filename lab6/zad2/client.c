@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 199309L
 #include "types.h"
 #include <signal.h>
 
@@ -14,6 +15,57 @@ void handle_exit()
     close_queue(client_queue);
     delete_queue(name);
     exit(EXIT_SUCCESS);
+}
+
+void register_notifications()
+{
+    struct sigevent ev;
+    ev.sigev_notify = SIGEV_SIGNAL;
+    ev.sigev_signo = SIGUSR1;
+
+    register_notif(client_queue, &ev);
+}
+void handle_signal(int signal)
+{
+    //todo
+    char *msg = malloc(sizeof(char) * MAX_MESSAGE_LENGHT);
+    unsigned int type;
+    receive_message(client_queue, msg, &type);
+    switch (type)
+    {
+    case SERVER_CLIENT_CHAT_INIT:
+        break;
+    case SERVER_CLIENT_TERMINATE:
+        break;
+    case CLIENT_CLIENT_MSG:
+        break;
+    case CLIENT_CLIENT_DICONNECT:
+        break;
+    default:
+        printf("Client -- received message of unknown type..\n");
+    }
+    free(msg);
+    register_notifications();
+}
+
+void register_me()
+{
+    char mess[MAX_MESSAGE_LENGHT];
+    sprintf(mess, "%d %s", CLIENT_SERVER_INIT, name);
+    send_message(server_queue, mess, CLIENT_SERVER_INIT);
+    char back[MAX_MESSAGE_LENGHT];
+    unsigned int type;
+    receive_message(client_queue, back, &type);
+    sscanf(back, "%d %d", &type, &id);
+    printf("Client -- registered with id: %d, key: %s\n", id, name);
+}
+
+void send_list()
+{
+    printf("Client -- LIST..\n");
+    char mess[MAX_MESSAGE_LENGHT];
+    sprintf(mess, "%d %d", CLIENT_SERVER_LIST, id);
+    send_message(server_queue, mess, CLIENT_SERVER_LIST);
 }
 
 int main()
@@ -33,5 +85,27 @@ int main()
         return -1;
     }
     signal(SIGINT, handle_exit);
+    signal(SIGUSR1, handle_signal);
+    register_me();
+    register_notifications();
+    char buffer[MAX_MESSAGE_LENGHT];
+    char message[MAX_MESSAGE_LENGHT];
+    while (1)
+    {
+        scanf("%s", buffer);
+        if (equals(buffer, "STOP"))
+        {
+            //
+        }
+        else if (equals(buffer, "LIST"))
+        {
+            send_list();
+        }
+        else
+        {
+            printf("Client --  unknown command.\n");
+        }
+    }
+
     return 0;
 }

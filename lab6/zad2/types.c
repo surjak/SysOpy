@@ -64,3 +64,8 @@ char *random_name(int length)
 
     return str;
 }
+void register_notif(int queue, struct sigevent *ev)
+{
+    mq_notify(queue, ev);
+}
+int equals(char *str1, char *str2) { return strcmp(str1, str2) == 0; }

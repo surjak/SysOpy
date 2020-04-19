@@ -72,6 +72,30 @@ void handle_init(char *msg)
     printf("Server -- registered client - id: %d, path: %s\n", client->id,
            client->name);
 }
+void handle_list(char *msg)
+{
+    int type, client_id;
+    sscanf(msg, "%d %d", &type, &client_id);
+    printf("Server -- listing clients\n");
+    for (int i = 0; i < MAX_CLIENTS; i++)
+    {
+        if (i == client_id)
+        {
+            printf("\tClient --> id - %d, name - %s (ME)\n", clients[i]->id,
+                   clients[i]->name);
+        }
+        else if (clients[i] && clients[i]->available)
+        {
+            printf("\tClient --> id - %d, name - %s is available\n", clients[i]->id,
+                   clients[i]->name);
+        }
+        else if (clients[i] && !clients[i]->available)
+        {
+            printf("\tClient --> id - %d, name - %s isn't available\n", clients[i]->id,
+                   clients[i]->name);
+        }
+    }
+}
 void handle_message()
 {
     char *msg = malloc(sizeof(char) * MAX_MESSAGE_LENGHT);
@@ -79,9 +103,19 @@ void handle_message()
     receive_message(server_queue, msg, &type);
     switch (type)
     {
+    case CLIENT_SERVER_STOP:
+        break;
+    case CLIENT_SERVER_DISCONNECT:
+        break;
+    case CLIENT_SERVER_LIST:
+        handle_list(msg);
+        break;
+    case CLIENT_SERVER_CONNECT:
+        break;
     case CLIENT_SERVER_INIT:
         handle_init(msg);
         break;
+
     default:
         printf("Unknow command");
     }
