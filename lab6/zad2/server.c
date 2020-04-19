@@ -16,8 +16,10 @@
 char *clients[MAX_CLIENTS][2];
 
 mqd_t server_queue;
-void on_exit(int sig)
+
+void clean(int sig)
 {
+    printf("EXITING\n");
     char *message = calloc(MAX_MESSAGE_LENGHT, sizeof(char));
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
@@ -74,7 +76,7 @@ int find_cliend_id()
 }
 void open_server_queue()
 {
-    server_queue = mq_open(SERVER_NAME, O_RDWR | O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO);
+    server_queue = mq_open(SERVER_NAME, O_RDWR | O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO, NULL);
     if (server_queue == -1)
     {
         perror("Can't open server queue");
@@ -93,10 +95,12 @@ void init()
 int main()
 {
     init();
+
     open_server_queue();
+
     struct sigaction sa;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
-    sa.sa_handler = on_exit;
+    sa.sa_handler = clean;
     sigaction(SIGINT, &sa, NULL);
 }
