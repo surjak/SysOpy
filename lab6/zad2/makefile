@@ -1,9 +1,5 @@
-CC=gcc -Wall
-
-all: 
-	$(CC) -o server server.c -lrt
-	make clean
-
-
+all:
+	gcc -o server server.c types.c -lrt
+	gcc -o client client.c types.c -lrt
 clean:
 	rm -f client server

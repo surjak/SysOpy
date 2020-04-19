@@ -1,106 +1,100 @@
-#define _XOPEN_SOURCE 500
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/msg.h>
-#include <sys/ipc.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <string.h>
-#include <signal.h>
-#include <mqueue.h>
-
 #include "types.h"
+#include <signal.h>
+
 #define MAX_CLIENTS 128
-char *clients[MAX_CLIENTS][2];
 
-mqd_t server_queue;
+Client *clients[MAX_CLIENTS];
 
-void clean(int sig)
+int server_queue = -1;
+int clients_count = 0;
+int waiting = 0;
+int current = 0;
+
+void on_exit_server()
 {
-    printf("EXITING\n");
-    char *message = calloc(MAX_MESSAGE_LENGHT, sizeof(char));
-    for (int i = 0; i < MAX_CLIENTS; i++)
-    {
-        if (clients[i][0] != NULL)
-        {
-            mqd_t client_queue = mq_open(clients[i][0], O_RDWR);
-            if (client_queue == -1)
-            {
-                perror("Can't access client queue\n");
-                exit(0);
-            }
-            if (mq_send(client_queue, message, MAX_MESSAGE_LENGHT, TYPE_STOP) < 0)
-            {
-                perror("Can't send message to client\n");
-                exit(0);
-            }
-            if (mq_receive(server_queue, message, MAX_MESSAGE_LENGHT, NULL) < 0)
-            {
-                perror("Can't receive message from client\n");
-                exit(0);
-            }
-            if (mq_close(client_queue) < 0)
-            {
-                perror("Can't close client queue\n");
-                exit(0);
-            }
-        }
-    }
-
-    if (mq_close(server_queue) < 0)
-    {
-        perror("Can't close server queue\n");
-        exit(0);
-    }
-    if (mq_unlink(SERVER_NAME) < 0)
-    {
-        perror("Can't delete server queue\n");
-        exit(0);
-    }
-    exit(0);
+    printf("Server exits\n");
+    close_queue(server_queue);
+    delete_queue(SERVER_NAME);
+    exit(EXIT_SUCCESS);
 }
-int find_cliend_id()
-{
 
+void handle_exit(int sig)
+{
+    char mess[MAX_MESSAGE_LENGHT];
+    sprintf(mess, "%d", SERVER_CLIENT_TERMINATE);
+    if (clients_count <= 0)
+        on_exit_server();
+    waiting = 1;
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
-        if (clients[i][0] == NULL)
+        if (clients[i])
         {
-            return i;
+            send_message(clients[i]->queue, mess, SERVER_CLIENT_TERMINATE);
         }
     }
+    printf("Server -- waiting for clients to terminate.\n");
+}
 
+int get_client_id()
+{
+    for (int i = 0; i < MAX_CLIENTS; i++)
+    {
+        if (clients[i] == NULL)
+            return i;
+    }
     return -1;
 }
-void open_server_queue()
+void handle_init(char *msg)
 {
-    server_queue = mq_open(SERVER_NAME, O_RDWR | O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO, NULL);
-    if (server_queue == -1)
+    int type;
+    char *name = malloc(MAX_MESSAGE_LENGHT * sizeof(char));
+    sscanf(msg, "%d %s", &type, name);
+    int pointer = get_client_id();
+    if (pointer == -1)
     {
-        perror("Can't open server queue");
-        exit(0);
+        printf("Server reached max clients \n");
+        return;
     }
+    Client *client = malloc(sizeof(Client));
+    client->available = 1;
+    client->name = name;
+    client->id = pointer;
+    client->queue = get_queue(name);
+    if (client->queue == -1)
+    {
+        err("Can't open client queue on init \n");
+    }
+    clients[pointer] = client;
+    char response[MAX_MESSAGE_LENGHT];
+    sprintf(response, "%d %d", SERVER_CLIENT_REGISTRED, pointer);
+    send_message(client->queue, response, SERVER_CLIENT_REGISTRED);
+    clients_count++;
+    printf("Server -- registered client - id: %d, path: %s\n", client->id,
+           client->name);
 }
-void init()
+void handle_message()
 {
-    for (int i = 0; i < MAX_CLIENTS; i++)
+    char *msg = malloc(sizeof(char) * MAX_MESSAGE_LENGHT);
+    unsigned int type;
+    receive_message(server_queue, msg, &type);
+    switch (type)
     {
-        clients[i][0] = NULL;
-        clients[i][1] = NULL;
+    case CLIENT_SERVER_INIT:
+        handle_init(msg);
+        break;
+    default:
+        printf("Unknow command");
     }
+    free(msg);
 }
-
 int main()
 {
-    init();
-
-    open_server_queue();
-
-    struct sigaction sa;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    sa.sa_handler = clean;
-    sigaction(SIGINT, &sa, NULL);
+    server_queue = create_queue(SERVER_NAME);
+    if (server_queue == -1)
+        err("Cant create queue for server");
+    printf("Running server... \n");
+    signal(SIGINT, handle_exit);
+    while (1)
+        handle_message();
+    return 0;
 }
