@@ -68,6 +68,17 @@ void send_list()
     send_message(server_queue, mess, CLIENT_SERVER_LIST);
 }
 
+void send_stop()
+{
+    printf("Client -- STOP..\n");
+
+    char mess[MAX_MESSAGE_LENGHT];
+    sprintf(mess, "%d %d", CLIENT_SERVER_STOP, id);
+    send_message(server_queue, mess, CLIENT_SERVER_STOP);
+
+    handle_exit();
+}
+void stop(int sig) { send_stop(); }
 int main()
 {
     srand(time(NULL));
@@ -84,7 +95,7 @@ int main()
         err("Cant open server queue");
         return -1;
     }
-    signal(SIGINT, handle_exit);
+    signal(SIGINT, stop);
     signal(SIGUSR1, handle_signal);
     register_me();
     register_notifications();
@@ -95,11 +106,26 @@ int main()
         scanf("%s", buffer);
         if (equals(buffer, "STOP"))
         {
-            //
+            send_stop();
         }
         else if (equals(buffer, "LIST"))
         {
             send_list();
+        }
+        else if (equals(buffer, "DISCONNECT"))
+        {
+            //
+        }
+        else if (equals(buffer, "CONNECT"))
+        { //
+        }
+        else if (equals(buffer, "MESSAGE"))
+        {
+            //
+        }
+        else if (equals(buffer, "PASS"))
+        {
+            //
         }
         else
         {
