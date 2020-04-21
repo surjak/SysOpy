@@ -23,7 +23,6 @@
 #define CLIENT_CLIENT_MSG 4
 #define CLIENT_CLIENT_DICONNECT 5
 
-#define MAX_CLIENTS 32
 #define MAX_MSG_LENGTH 256
 
 #define PREFIX ("/queues-")

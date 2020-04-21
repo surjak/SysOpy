@@ -1,18 +1,18 @@
 #include "types.h"
 #include <signal.h>
-
+#define MAX_CLIENTS 32
 Client *clients[MAX_CLIENTS];
 
-int serverQueueDesc = -1;
-int clientsRunningCount = 0;
-int waitingForClientsToTerminate = 0;
+int server_queue = -1;
+int clients_connected = 0;
+int waiting = 0;
 int current = 0;
 
 // HANDLE EXIT - CRTL+C
 void exitServer()
 {
     printf("Server exits...\n");
-    close_queue(serverQueueDesc);
+    close_queue(server_queue);
     delete_queue(SERVER_NAME);
 
     exit(EXIT_SUCCESS);
@@ -23,10 +23,10 @@ void handleSignalExit(int signal)
     char msg[MAX_MSG_LENGTH];
     sprintf(msg, "%d", SERVER_CLIENT_TERMINATE);
 
-    if (clientsRunningCount <= 0)
+    if (clients_connected <= 0)
         exitServer();
 
-    waitingForClientsToTerminate = 1;
+    waiting = 1;
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
         if (clients[i])
@@ -48,10 +48,10 @@ void handleStop(char *msg)
     clients[clientId] = NULL;
     free(clients[clientId]);
 
-    clientsRunningCount -= 1;
+    clients_connected -= 1;
     printf("Server -- Received STOP from %d\n", clientId);
 
-    if (waitingForClientsToTerminate && clientsRunningCount <= 0)
+    if (waiting && clients_connected <= 0)
     {
         exitServer();
     }
@@ -169,7 +169,7 @@ void handleInit(char *msg)
         sprintf(scMsg, "%d %d", SERVER_CLIENT_REGISTRED, pointer);
 
         send_message(client->queueDesc, scMsg, SERVER_CLIENT_REGISTRED);
-        clientsRunningCount += 1;
+        clients_connected += 1;
         printf("Server -- registered client - id: %d, path: %s\n", client->clientId,
                client->name);
     }
@@ -182,7 +182,7 @@ void handleMessage()
 {
     char *msg = malloc(sizeof(char) * MAX_MSG_LENGTH);
     unsigned int type;
-    receive_message(serverQueueDesc, msg, &type);
+    receive_message(server_queue, msg, &type);
 
     if (type == CLIENT_SERVER_STOP)
     {
@@ -214,8 +214,8 @@ void handleMessage()
 
 int main(int argc, char *arrgv[])
 {
-    serverQueueDesc = create_queue(SERVER_NAME);
-    if (serverQueueDesc == -1)
+    server_queue = create_queue(SERVER_NAME);
+    if (server_queue == -1)
     {
         printf("failed to open\n");
         printError();

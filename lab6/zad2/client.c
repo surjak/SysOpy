@@ -2,7 +2,7 @@
 #include <signal.h>
 
 int clientQueueDesc;
-int serverQueueDesc;
+int server_queue;
 int clientId;
 char *name;
 
@@ -12,7 +12,7 @@ int chateeQueueDesc = -1;
 void exitClient()
 {
     printf("Client -- exit..\n");
-    close_queue(serverQueueDesc);
+    close_queue(server_queue);
     close_queue(clientQueueDesc);
 
     delete_queue(name);
@@ -25,7 +25,7 @@ void registerMe()
     char csMsg[MAX_MSG_LENGTH];
     sprintf(csMsg, "%d %s", CLIENT_SERVER_INIT, name);
 
-    send_message(serverQueueDesc, csMsg, CLIENT_SERVER_INIT);
+    send_message(server_queue, csMsg, CLIENT_SERVER_INIT);
 
     char scMsg[MAX_MSG_LENGTH];
     unsigned int type;
@@ -43,7 +43,7 @@ void sendStop()
 
     char csMsg[MAX_MSG_LENGTH];
     sprintf(csMsg, "%d %d", CLIENT_SERVER_STOP, clientId);
-    send_message(serverQueueDesc, csMsg, CLIENT_SERVER_STOP);
+    send_message(server_queue, csMsg, CLIENT_SERVER_STOP);
 
     exitClient();
 }
@@ -58,7 +58,7 @@ void sendList()
 
     char csMsg[MAX_MSG_LENGTH];
     sprintf(csMsg, "%d %d", CLIENT_SERVER_LIST, clientId);
-    send_message(serverQueueDesc, csMsg, CLIENT_SERVER_LIST);
+    send_message(server_queue, csMsg, CLIENT_SERVER_LIST);
 }
 // ----------------
 
@@ -69,7 +69,7 @@ void sendDisconnect()
 
     char csMsg[MAX_MSG_LENGTH];
     sprintf(csMsg, "%d %d", CLIENT_SERVER_DISCONNECT, clientId);
-    send_message(serverQueueDesc, csMsg, CLIENT_SERVER_DISCONNECT);
+    send_message(server_queue, csMsg, CLIENT_SERVER_DISCONNECT);
 
     if (chateeQueueDesc != -1)
     {
@@ -90,7 +90,7 @@ void sendConnect(int chateeId)
 
     char csMsg[MAX_MSG_LENGTH];
     sprintf(csMsg, "%d %d %d", CLIENT_SERVER_CONNECT, clientId, chateeId);
-    send_message(serverQueueDesc, csMsg, CLIENT_SERVER_CONNECT);
+    send_message(server_queue, csMsg, CLIENT_SERVER_CONNECT);
 }
 // ----------------
 
@@ -204,8 +204,8 @@ int main(int charc, char *argv[])
         return -1;
     }
 
-    serverQueueDesc = get_queue(SERVER_NAME);
-    if (serverQueueDesc == -1)
+    server_queue = get_queue(SERVER_NAME);
+    if (server_queue == -1)
     {
         printf("Failed to open server queue\n");
         printError();
