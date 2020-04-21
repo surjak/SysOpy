@@ -44,8 +44,8 @@ char *concat(const char *s1, const char *s2);
 
 struct Client
 {
-    int clientId;
-    int queueDesc;
+    int id;
+    int queue;
     char *name;
     int available;
 } typedef Client;
