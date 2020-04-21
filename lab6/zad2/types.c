@@ -1,8 +1,8 @@
 #include "types.h"
 
-int stringEq(char *str1, char *str2) { return strcmp(str1, str2) == 0; }
+int equals(char *str1, char *str2) { return strcmp(str1, str2) == 0; }
 
-char *randomString(int length)
+char *random_string(int length)
 {
     char *str = calloc(length + 1, sizeof(char));
 

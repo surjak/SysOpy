@@ -29,22 +29,18 @@
 #define PREFIX ("/queues-")
 #define SERVER_NAME (concat(PREFIX, "server"))
 #define CLIENT_RANDOM_NAME \
-    (concat(PREFIX, concat("client-", randomString(12))))
+    (concat(PREFIX, concat("client-", random_string(12))))
 
 void delete_queue(char *name);
 void close_queue(mqd_t descr);
 int create_queue(char *name);
 int get_queue(char *name);
-
 void send_message(mqd_t desc, char *msgPointer, int type);
-
 void receive_message(mqd_t desc, char *msgPointer, int *typePointer);
-
 void register_notification(mqd_t desc, struct sigevent *s);
-
 void printError();
-int stringEq(char *str1, char *str2);
-char *randomString(int length);
+int equals(char *str1, char *str2);
+char *random_string(int length);
 char *concat(const char *s1, const char *s2);
 
 struct Client

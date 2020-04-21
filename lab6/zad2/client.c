@@ -224,26 +224,26 @@ int main(int charc, char *argv[])
     {
         // Client executes command.
         scanf("%s", buffer);
-        if (stringEq(buffer, "STOP"))
+        if (equals(buffer, "STOP"))
         {
             sendStop();
         }
-        else if (stringEq(buffer, "LIST"))
+        else if (equals(buffer, "LIST"))
         {
             sendList();
         }
-        else if (stringEq(buffer, "DISCONNECT"))
+        else if (equals(buffer, "DISCONNECT"))
         {
             sendDisconnect();
         }
-        else if (stringEq(buffer, "CONNECT"))
+        else if (equals(buffer, "CONNECT"))
         {
             int chateeId;
 
             scanf("%d", &chateeId);
             sendConnect(chateeId);
         }
-        else if (stringEq(buffer, "SEND"))
+        else if (equals(buffer, "SEND"))
         {
             scanf("%s", message);
 
@@ -256,7 +256,7 @@ int main(int charc, char *argv[])
                 sendMessage(message);
             }
         }
-        else if (stringEq(buffer, "PASS"))
+        else if (equals(buffer, "PASS"))
         {
             ;
         }
