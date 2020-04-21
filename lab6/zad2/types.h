@@ -31,16 +31,16 @@
 #define CLIENT_RANDOM_NAME \
     (concat(PREFIX, concat("client-", randomString(12))))
 
-void DELETE_QUEUE(char *name);
-void CLOSE_QUEUE(mqd_t descr);
-int CREATE_QUEUE(char *name);
-int GET_QUEUE(char *name);
+void delete_queue(char *name);
+void close_queue(mqd_t descr);
+int create_queue(char *name);
+int get_queue(char *name);
 
-void SEND_MESSAGE(mqd_t desc, char *msgPointer, int type);
+void send_message(mqd_t desc, char *msgPointer, int type);
 
-void RECEIVE_MESSAGE(mqd_t desc, char *msgPointer, int *typePointer);
+void receive_message(mqd_t desc, char *msgPointer, int *typePointer);
 
-void REGISTER_NOTIFICATION(mqd_t desc, struct sigevent *s);
+void register_notification(mqd_t desc, struct sigevent *s);
 
 void printError();
 int stringEq(char *str1, char *str2);

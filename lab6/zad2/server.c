@@ -12,8 +12,8 @@ int current = 0;
 void exitServer()
 {
     printf("Server exits...\n");
-    CLOSE_QUEUE(serverQueueDesc);
-    DELETE_QUEUE(SERVER_NAME);
+    close_queue(serverQueueDesc);
+    delete_queue(SERVER_NAME);
 
     exit(EXIT_SUCCESS);
 }
@@ -31,7 +31,7 @@ void handleSignalExit(int signal)
     {
         if (clients[i])
         {
-            SEND_MESSAGE(clients[i]->queueDesc, msg, SERVER_CLIENT_TERMINATE);
+            send_message(clients[i]->queueDesc, msg, SERVER_CLIENT_TERMINATE);
         }
     }
 
@@ -120,8 +120,8 @@ void handleConnect(char *msg)
     clients[id1]->available = 0;
     clients[id2]->available = 0;
 
-    SEND_MESSAGE(clients[id1]->queueDesc, msg1, SERVER_CLIENT_CHAT_INIT);
-    SEND_MESSAGE(clients[id2]->queueDesc, msg2, SERVER_CLIENT_CHAT_INIT);
+    send_message(clients[id1]->queueDesc, msg1, SERVER_CLIENT_CHAT_INIT);
+    send_message(clients[id2]->queueDesc, msg2, SERVER_CLIENT_CHAT_INIT);
 
     printf("Server -- initialized chat, %d <=> %d\n", id1, id2);
 }
@@ -154,7 +154,7 @@ void handleInit(char *msg)
         client->available = 1;
         client->name = name;
         client->clientId = pointer;
-        client->queueDesc = GET_QUEUE(name);
+        client->queueDesc = get_queue(name);
 
         if (client->queueDesc == -1)
         {
@@ -168,7 +168,7 @@ void handleInit(char *msg)
         char scMsg[MAX_MSG_LENGTH];
         sprintf(scMsg, "%d %d", SERVER_CLIENT_REGISTRED, pointer);
 
-        SEND_MESSAGE(client->queueDesc, scMsg, SERVER_CLIENT_REGISTRED);
+        send_message(client->queueDesc, scMsg, SERVER_CLIENT_REGISTRED);
         clientsRunningCount += 1;
         printf("Server -- registered client - id: %d, path: %s\n", client->clientId,
                client->name);
@@ -182,7 +182,7 @@ void handleMessage()
 {
     char *msg = malloc(sizeof(char) * MAX_MSG_LENGTH);
     unsigned int type;
-    RECEIVE_MESSAGE(serverQueueDesc, msg, &type);
+    receive_message(serverQueueDesc, msg, &type);
 
     if (type == CLIENT_SERVER_STOP)
     {
@@ -214,7 +214,7 @@ void handleMessage()
 
 int main(int argc, char *arrgv[])
 {
-    serverQueueDesc = CREATE_QUEUE(SERVER_NAME);
+    serverQueueDesc = create_queue(SERVER_NAME);
     if (serverQueueDesc == -1)
     {
         printf("failed to open\n");

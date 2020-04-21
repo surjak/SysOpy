@@ -37,9 +37,9 @@ void printError()
     }
 }
 
-void DELETE_QUEUE(char *name) { mq_unlink(name); }
-void CLOSE_QUEUE(mqd_t descr) { mq_close(descr); }
-int CREATE_QUEUE(char *name)
+void delete_queue(char *name) { mq_unlink(name); }
+void close_queue(mqd_t descr) { mq_close(descr); }
+int create_queue(char *name)
 {
     struct mq_attr attr;
     attr.mq_flags = 0;
@@ -49,10 +49,10 @@ int CREATE_QUEUE(char *name)
 
     return mq_open(name, O_RDONLY | O_CREAT | O_EXCL, 0666, &attr);
 }
-int GET_QUEUE(char *name) { return mq_open(name, O_WRONLY); }
+int get_queue(char *name) { return mq_open(name, O_WRONLY); }
 
-void SEND_MESSAGE(mqd_t desc, char *msgPointer, int type) { mq_send(desc, msgPointer, strlen(msgPointer), type); }
+void send_message(mqd_t desc, char *msgPointer, int type) { mq_send(desc, msgPointer, strlen(msgPointer), type); }
 
-void RECEIVE_MESSAGE(mqd_t desc, char *msgPointer, int *typePointer) { mq_receive(desc, msgPointer, MAX_MSG_LENGTH, typePointer); }
+void receive_message(mqd_t desc, char *msgPointer, int *typePointer) { mq_receive(desc, msgPointer, MAX_MSG_LENGTH, typePointer); }
 
-void REGISTER_NOTIFICATION(mqd_t desc, struct sigevent *s) { mq_notify(desc, s); }
+void register_notification(mqd_t desc, struct sigevent *s) { mq_notify(desc, s); }

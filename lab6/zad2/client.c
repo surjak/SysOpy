@@ -12,10 +12,10 @@ int chateeQueueDesc = -1;
 void exitClient()
 {
     printf("Client -- exit..\n");
-    CLOSE_QUEUE(serverQueueDesc);
-    CLOSE_QUEUE(clientQueueDesc);
+    close_queue(serverQueueDesc);
+    close_queue(clientQueueDesc);
 
-    DELETE_QUEUE(name);
+    delete_queue(name);
     exit(EXIT_SUCCESS);
 }
 
@@ -25,11 +25,11 @@ void registerMe()
     char csMsg[MAX_MSG_LENGTH];
     sprintf(csMsg, "%d %s", CLIENT_SERVER_INIT, name);
 
-    SEND_MESSAGE(serverQueueDesc, csMsg, CLIENT_SERVER_INIT);
+    send_message(serverQueueDesc, csMsg, CLIENT_SERVER_INIT);
 
     char scMsg[MAX_MSG_LENGTH];
     unsigned int type;
-    RECEIVE_MESSAGE(clientQueueDesc, scMsg, &type);
+    receive_message(clientQueueDesc, scMsg, &type);
 
     sscanf(scMsg, "%d %d", &type, &clientId);
     printf("Client -- registered with id: %d, key: %s\n", clientId, name);
@@ -43,7 +43,7 @@ void sendStop()
 
     char csMsg[MAX_MSG_LENGTH];
     sprintf(csMsg, "%d %d", CLIENT_SERVER_STOP, clientId);
-    SEND_MESSAGE(serverQueueDesc, csMsg, CLIENT_SERVER_STOP);
+    send_message(serverQueueDesc, csMsg, CLIENT_SERVER_STOP);
 
     exitClient();
 }
@@ -58,7 +58,7 @@ void sendList()
 
     char csMsg[MAX_MSG_LENGTH];
     sprintf(csMsg, "%d %d", CLIENT_SERVER_LIST, clientId);
-    SEND_MESSAGE(serverQueueDesc, csMsg, CLIENT_SERVER_LIST);
+    send_message(serverQueueDesc, csMsg, CLIENT_SERVER_LIST);
 }
 // ----------------
 
@@ -69,15 +69,15 @@ void sendDisconnect()
 
     char csMsg[MAX_MSG_LENGTH];
     sprintf(csMsg, "%d %d", CLIENT_SERVER_DISCONNECT, clientId);
-    SEND_MESSAGE(serverQueueDesc, csMsg, CLIENT_SERVER_DISCONNECT);
+    send_message(serverQueueDesc, csMsg, CLIENT_SERVER_DISCONNECT);
 
     if (chateeQueueDesc != -1)
     {
         char ccMsg[MAX_MSG_LENGTH];
         sprintf(csMsg, "%d %d", CLIENT_CLIENT_DICONNECT, clientId);
-        SEND_MESSAGE(chateeQueueDesc, ccMsg, CLIENT_CLIENT_DICONNECT);
+        send_message(chateeQueueDesc, ccMsg, CLIENT_CLIENT_DICONNECT);
 
-        CLOSE_QUEUE(chateeQueueDesc);
+        close_queue(chateeQueueDesc);
         chateeQueueDesc = -1;
     }
 }
@@ -90,7 +90,7 @@ void sendConnect(int chateeId)
 
     char csMsg[MAX_MSG_LENGTH];
     sprintf(csMsg, "%d %d %d", CLIENT_SERVER_CONNECT, clientId, chateeId);
-    SEND_MESSAGE(serverQueueDesc, csMsg, CLIENT_SERVER_CONNECT);
+    send_message(serverQueueDesc, csMsg, CLIENT_SERVER_CONNECT);
 }
 // ----------------
 
@@ -100,7 +100,7 @@ void sendMessage(char *message)
     char ccMsg[MAX_MSG_LENGTH];
     sprintf(ccMsg, "%d %s", CLIENT_CLIENT_MSG, message);
 
-    SEND_MESSAGE(chateeQueueDesc, ccMsg, CLIENT_CLIENT_MSG);
+    send_message(chateeQueueDesc, ccMsg, CLIENT_CLIENT_MSG);
     printf("------------------------------------------------\n");
     printf("Me:          \t%s\n", message);
     printf("------------------------------------------------\n");
@@ -113,7 +113,7 @@ void handleDisconnect(char *msg)
     printf("Client -- received disconnect msg from chatee..\n");
 
     chateeQueueDesc = -1;
-    CLOSE_QUEUE(chateeQueueDesc);
+    close_queue(chateeQueueDesc);
     sendDisconnect();
 }
 // ----------------
@@ -126,7 +126,7 @@ void handleChatInit(char *msg)
     char chateeName[MAX_MSG_LENGTH];
     sscanf(msg, "%d %d %s", &type, &chateeId, chateeName);
     printf("Client -- entering chat with %d..\n", chateeId);
-    chateeQueueDesc = GET_QUEUE(chateeName);
+    chateeQueueDesc = get_queue(chateeName);
 }
 // ----------------
 
@@ -156,7 +156,7 @@ void registerNotification()
     ev.sigev_notify = SIGEV_SIGNAL;
     ev.sigev_signo = SIGUSR1;
 
-    REGISTER_NOTIFICATION(clientQueueDesc, &ev);
+    register_notification(clientQueueDesc, &ev);
 }
 
 void handleSignal(int signal)
@@ -165,7 +165,7 @@ void handleSignal(int signal)
     char *msg = malloc(sizeof(char) * MAX_MSG_LENGTH);
     unsigned int type;
 
-    RECEIVE_MESSAGE(clientQueueDesc, msg, &type);
+    receive_message(clientQueueDesc, msg, &type);
     if (type == SERVER_CLIENT_CHAT_INIT)
     {
         handleChatInit(msg);
@@ -195,7 +195,7 @@ int main(int charc, char *argv[])
 {
     srand(time(NULL));
     name = CLIENT_RANDOM_NAME;
-    clientQueueDesc = CREATE_QUEUE(name);
+    clientQueueDesc = create_queue(name);
     // This is just in case our key was not unique.
     if (clientQueueDesc == -1)
     {
@@ -204,7 +204,7 @@ int main(int charc, char *argv[])
         return -1;
     }
 
-    serverQueueDesc = GET_QUEUE(SERVER_NAME);
+    serverQueueDesc = get_queue(SERVER_NAME);
     if (serverQueueDesc == -1)
     {
         printf("Failed to open server queue\n");
