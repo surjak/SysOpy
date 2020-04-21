@@ -8,7 +8,6 @@ int clients_connected = 0;
 int waiting = 0;
 int current = 0;
 
-// HANDLE EXIT - CRTL+C
 void on_exit_server()
 {
     printf("Server exits...\n");
@@ -35,11 +34,9 @@ void handle_sigint(int signal)
         }
     }
 
-    printf("Server -- waiting for clients to terminate.\n");
+    printf("Server is waiting for clients to terminate. Press Ctrl + C on each client side\n");
 }
-// -------------------------
 
-// HANDLE - STOP
 void handle_stop(char *msg)
 {
     int type, clientId;
@@ -56,46 +53,40 @@ void handle_stop(char *msg)
         on_exit_server();
     }
 }
-// -------------------------
 
-// HANDLE - DISCONNECT
 void handle_disconnect(char *msg)
 {
     int type, clientId;
     sscanf(msg, "%d %d", &type, &clientId);
 
     clients[clientId]->available = 1;
-    printf("Server -- client with id %d left chat and is now available..\n",
+    printf("Server -- client with id %d left chat\n",
            clientId);
 }
-// -------------------------
 
-// HANDLE - LIST
 void handle_list(char *msg)
 {
     int type, clientId;
     sscanf(msg, "%d %d", &type, &clientId);
 
-    printf("Server -- listing available clients as requested by client with id "
-           "%d...\n",
-           clientId);
+    printf("Server -- listing clients \n");
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
         if (i == clientId)
         {
-            printf("\tClient --> id - %d, path - %s (ME)\n", clients[i]->clientId,
-                   clients[i]->name);
+            printf("\tClient --> id - %d (ME)\n", clients[i]->clientId);
         }
         else if (clients[i] && clients[i]->available)
         {
-            printf("\tClient --> id - %d, path - %s\n", clients[i]->clientId,
-                   clients[i]->name);
+            printf("\tClient --> id - %d is available\n", clients[i]->clientId);
+        }
+        else if (clients[i] && !clients[i]->available)
+        {
+            printf("\tClient --> id - %d isn't available\n", clients[i]->clientId);
         }
     }
 }
-// -------------------------
 
-// HANDLE - CONNECT
 void handle_connect(char *msg)
 {
     int type, clientId, chateeId;
@@ -104,11 +95,10 @@ void handle_connect(char *msg)
     int id1 = clientId;
     int id2 = chateeId;
 
-    // Check if client under sent id is avaiable
     if (id2 < 0 || id2 >= MAX_CLIENTS || !clients[id2] ||
         !clients[id2]->available || id1 == id2)
     {
-        printf("Server -- requested client is not avaiable\n");
+        printf("Server -- client is not avaiable\n");
         return;
     }
     char msg1[MAX_MESSAGE_SIZE];
@@ -123,11 +113,9 @@ void handle_connect(char *msg)
     send_message(clients[id1]->queueDesc, msg1, SERVER_CLIENT_CHAT_INIT);
     send_message(clients[id2]->queueDesc, msg2, SERVER_CLIENT_CHAT_INIT);
 
-    printf("Server -- initialized chat, %d <=> %d\n", id1, id2);
+    printf("Server -- initialized chat between %d and %d\n", id1, id2);
 }
-// -------------------------
 
-// HANDLE - INIT
 void handle_init(char *msg)
 {
     int type;
@@ -146,7 +134,7 @@ void handle_init(char *msg)
 
     if (pointer == -1)
     {
-        printf("Server -- reached maximum capcity, cannot add another client...\n");
+        printf("Server is full, cannot add another client.\n");
     }
     else
     {
@@ -159,25 +147,21 @@ void handle_init(char *msg)
         if (client->queueDesc == -1)
         {
             printError();
-            printf("Faile to open client's queue\n");
+            printf("Failed to open client's queue\n");
         }
 
         clients[pointer] = client;
 
-        // Notify client that he's now registered.
         char scMsg[MAX_MESSAGE_SIZE];
         sprintf(scMsg, "%d %d", SERVER_CLIENT_REGISTRED, pointer);
 
         send_message(client->queueDesc, scMsg, SERVER_CLIENT_REGISTRED);
         clients_connected += 1;
-        printf("Server -- registered client - id: %d, path: %s\n", client->clientId,
+        printf("Server -- registered client - id: %d, queue_name: %s\n", client->clientId,
                client->name);
     }
 }
-// -------------------------
 
-// RECEIVE MESSAGE
-// Note that we handle messages in order based on priority.
 void handle_message()
 {
     char *msg = malloc(sizeof(char) * MAX_MESSAGE_SIZE);
@@ -217,7 +201,7 @@ int main(int argc, char *arrgv[])
     server_queue = create_queue(SERVER_NAME);
     if (server_queue == -1)
     {
-        printf("failed to open\n");
+        printf("Failed to open\n");
         printError();
     }
     signal(SIGINT, handle_sigint);
