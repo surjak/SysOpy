@@ -22,12 +22,12 @@ void exitClient()
 // SEND - INIT
 void registerMe()
 {
-    char csMsg[MAX_MSG_LENGTH];
+    char csMsg[MAX_MESSAGE_SIZE];
     sprintf(csMsg, "%d %s", CLIENT_SERVER_INIT, name);
 
     send_message(server_queue, csMsg, CLIENT_SERVER_INIT);
 
-    char scMsg[MAX_MSG_LENGTH];
+    char scMsg[MAX_MESSAGE_SIZE];
     unsigned int type;
     receive_message(clientQueueDesc, scMsg, &type);
 
@@ -41,7 +41,7 @@ void sendStop()
 {
     printf("Client -- sending STOP..\n");
 
-    char csMsg[MAX_MSG_LENGTH];
+    char csMsg[MAX_MESSAGE_SIZE];
     sprintf(csMsg, "%d %d", CLIENT_SERVER_STOP, clientId);
     send_message(server_queue, csMsg, CLIENT_SERVER_STOP);
 
@@ -56,7 +56,7 @@ void sendList()
 {
     printf("Client -- sending LIST..\n");
 
-    char csMsg[MAX_MSG_LENGTH];
+    char csMsg[MAX_MESSAGE_SIZE];
     sprintf(csMsg, "%d %d", CLIENT_SERVER_LIST, clientId);
     send_message(server_queue, csMsg, CLIENT_SERVER_LIST);
 }
@@ -67,13 +67,13 @@ void sendDisconnect()
 {
     printf("Client -- disconnected chat\n");
 
-    char csMsg[MAX_MSG_LENGTH];
+    char csMsg[MAX_MESSAGE_SIZE];
     sprintf(csMsg, "%d %d", CLIENT_SERVER_DISCONNECT, clientId);
     send_message(server_queue, csMsg, CLIENT_SERVER_DISCONNECT);
 
     if (chateeQueueDesc != -1)
     {
-        char ccMsg[MAX_MSG_LENGTH];
+        char ccMsg[MAX_MESSAGE_SIZE];
         sprintf(csMsg, "%d %d", CLIENT_CLIENT_DICONNECT, clientId);
         send_message(chateeQueueDesc, ccMsg, CLIENT_CLIENT_DICONNECT);
 
@@ -88,7 +88,7 @@ void sendConnect(int chateeId)
 {
     printf("Client -- seending CONNECT to chatee with ID: %d\n", chateeId);
 
-    char csMsg[MAX_MSG_LENGTH];
+    char csMsg[MAX_MESSAGE_SIZE];
     sprintf(csMsg, "%d %d %d", CLIENT_SERVER_CONNECT, clientId, chateeId);
     send_message(server_queue, csMsg, CLIENT_SERVER_CONNECT);
 }
@@ -97,7 +97,7 @@ void sendConnect(int chateeId)
 // SEND - MSG
 void sendMessage(char *message)
 {
-    char ccMsg[MAX_MSG_LENGTH];
+    char ccMsg[MAX_MESSAGE_SIZE];
     sprintf(ccMsg, "%d %s", CLIENT_CLIENT_MSG, message);
 
     send_message(chateeQueueDesc, ccMsg, CLIENT_CLIENT_MSG);
@@ -108,7 +108,7 @@ void sendMessage(char *message)
 // ----------------
 
 // HANDLE - DISCONNECT
-void handleDisconnect(char *msg)
+void handle_disconnect(char *msg)
 {
     printf("Client -- received disconnect msg from chatee..\n");
 
@@ -123,7 +123,7 @@ void handleChatInit(char *msg)
 {
     int chateeId;
     unsigned int type;
-    char chateeName[MAX_MSG_LENGTH];
+    char chateeName[MAX_MESSAGE_SIZE];
     sscanf(msg, "%d %d %s", &type, &chateeId, chateeName);
     printf("Client -- entering chat with %d..\n", chateeId);
     chateeQueueDesc = get_queue(chateeName);
@@ -138,9 +138,9 @@ void handleTerminate()
 // ----------------
 
 // Handle - MSG
-void handleMessage(char *ccMsg)
+void handle_message(char *ccMsg)
 {
-    char msg[MAX_MSG_LENGTH];
+    char msg[MAX_MESSAGE_SIZE];
     unsigned int type;
     sscanf(ccMsg, "%d %s", &type, msg);
 
@@ -162,7 +162,7 @@ void registerNotification()
 void handleSignal(int signal)
 {
 
-    char *msg = malloc(sizeof(char) * MAX_MSG_LENGTH);
+    char *msg = malloc(sizeof(char) * MAX_MESSAGE_SIZE);
     unsigned int type;
 
     receive_message(clientQueueDesc, msg, &type);
@@ -176,11 +176,11 @@ void handleSignal(int signal)
     }
     else if (type == CLIENT_CLIENT_MSG)
     {
-        handleMessage(msg);
+        handle_message(msg);
     }
     else if (type == CLIENT_CLIENT_DICONNECT)
     {
-        handleDisconnect(msg);
+        handle_disconnect(msg);
     }
     else
     {
@@ -217,8 +217,8 @@ int main(int charc, char *argv[])
     registerMe();
     registerNotification();
 
-    char buffer[MAX_MSG_LENGTH];
-    char message[MAX_MSG_LENGTH];
+    char buffer[MAX_MESSAGE_SIZE];
+    char message[MAX_MESSAGE_SIZE];
 
     while (1)
     {

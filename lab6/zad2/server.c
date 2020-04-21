@@ -9,7 +9,7 @@ int waiting = 0;
 int current = 0;
 
 // HANDLE EXIT - CRTL+C
-void exitServer()
+void on_exit_server()
 {
     printf("Server exits...\n");
     close_queue(server_queue);
@@ -18,13 +18,13 @@ void exitServer()
     exit(EXIT_SUCCESS);
 }
 
-void handleSignalExit(int signal)
+void handle_sigint(int signal)
 {
-    char msg[MAX_MSG_LENGTH];
+    char msg[MAX_MESSAGE_SIZE];
     sprintf(msg, "%d", SERVER_CLIENT_TERMINATE);
 
     if (clients_connected <= 0)
-        exitServer();
+        on_exit_server();
 
     waiting = 1;
     for (int i = 0; i < MAX_CLIENTS; i++)
@@ -40,7 +40,7 @@ void handleSignalExit(int signal)
 // -------------------------
 
 // HANDLE - STOP
-void handleStop(char *msg)
+void handle_stop(char *msg)
 {
     int type, clientId;
     sscanf(msg, "%d %d", &type, &clientId);
@@ -53,13 +53,13 @@ void handleStop(char *msg)
 
     if (waiting && clients_connected <= 0)
     {
-        exitServer();
+        on_exit_server();
     }
 }
 // -------------------------
 
 // HANDLE - DISCONNECT
-void handleDisconnect(char *msg)
+void handle_disconnect(char *msg)
 {
     int type, clientId;
     sscanf(msg, "%d %d", &type, &clientId);
@@ -71,7 +71,7 @@ void handleDisconnect(char *msg)
 // -------------------------
 
 // HANDLE - LIST
-void handleList(char *msg)
+void handle_list(char *msg)
 {
     int type, clientId;
     sscanf(msg, "%d %d", &type, &clientId);
@@ -96,7 +96,7 @@ void handleList(char *msg)
 // -------------------------
 
 // HANDLE - CONNECT
-void handleConnect(char *msg)
+void handle_connect(char *msg)
 {
     int type, clientId, chateeId;
     sscanf(msg, "%d %d %d", &type, &clientId, &chateeId);
@@ -111,8 +111,8 @@ void handleConnect(char *msg)
         printf("Server -- requested client is not avaiable\n");
         return;
     }
-    char msg1[MAX_MSG_LENGTH];
-    char msg2[MAX_MSG_LENGTH];
+    char msg1[MAX_MESSAGE_SIZE];
+    char msg2[MAX_MESSAGE_SIZE];
 
     sprintf(msg1, "%d %d %s", SERVER_CLIENT_CHAT_INIT, id2, clients[id2]->name);
     sprintf(msg2, "%d %d %s", SERVER_CLIENT_CHAT_INIT, id1, clients[id1]->name);
@@ -128,10 +128,10 @@ void handleConnect(char *msg)
 // -------------------------
 
 // HANDLE - INIT
-void handleInit(char *msg)
+void handle_init(char *msg)
 {
     int type;
-    char *name = malloc(MAX_MSG_LENGTH * sizeof(char));
+    char *name = malloc(MAX_MESSAGE_SIZE * sizeof(char));
     sscanf(msg, "%d %s", &type, name);
 
     int pointer = -1;
@@ -165,7 +165,7 @@ void handleInit(char *msg)
         clients[pointer] = client;
 
         // Notify client that he's now registered.
-        char scMsg[MAX_MSG_LENGTH];
+        char scMsg[MAX_MESSAGE_SIZE];
         sprintf(scMsg, "%d %d", SERVER_CLIENT_REGISTRED, pointer);
 
         send_message(client->queueDesc, scMsg, SERVER_CLIENT_REGISTRED);
@@ -178,31 +178,31 @@ void handleInit(char *msg)
 
 // RECEIVE MESSAGE
 // Note that we handle messages in order based on priority.
-void handleMessage()
+void handle_message()
 {
-    char *msg = malloc(sizeof(char) * MAX_MSG_LENGTH);
+    char *msg = malloc(sizeof(char) * MAX_MESSAGE_SIZE);
     unsigned int type;
     receive_message(server_queue, msg, &type);
 
     if (type == CLIENT_SERVER_STOP)
     {
-        handleStop(msg);
+        handle_stop(msg);
     }
     else if (type == CLIENT_SERVER_DISCONNECT)
     {
-        handleDisconnect(msg);
+        handle_disconnect(msg);
     }
     else if (type == CLIENT_SERVER_LIST)
     {
-        handleList(msg);
+        handle_list(msg);
     }
     else if (type == CLIENT_SERVER_CONNECT)
     {
-        handleConnect(msg);
+        handle_connect(msg);
     }
     else if (type == CLIENT_SERVER_INIT)
     {
-        handleInit(msg);
+        handle_init(msg);
     }
     else
     {
@@ -220,12 +220,12 @@ int main(int argc, char *arrgv[])
         printf("failed to open\n");
         printError();
     }
-    signal(SIGINT, handleSignalExit);
+    signal(SIGINT, handle_sigint);
 
     printf("Server running...\n");
     while (1)
     {
-        handleMessage();
+        handle_message();
     }
 
     return 0;

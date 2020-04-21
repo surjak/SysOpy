@@ -44,7 +44,7 @@ int create_queue(char *name)
     struct mq_attr attr;
     attr.mq_flags = 0;
     attr.mq_maxmsg = 10;
-    attr.mq_msgsize = MAX_MSG_LENGTH - 1;
+    attr.mq_msgsize = MAX_MESSAGE_SIZE - 1;
     attr.mq_curmsgs = 0;
 
     return mq_open(name, O_RDONLY | O_CREAT | O_EXCL, 0666, &attr);
@@ -53,6 +53,6 @@ int get_queue(char *name) { return mq_open(name, O_WRONLY); }
 
 void send_message(mqd_t desc, char *msgPointer, int type) { mq_send(desc, msgPointer, strlen(msgPointer), type); }
 
-void receive_message(mqd_t desc, char *msgPointer, int *typePointer) { mq_receive(desc, msgPointer, MAX_MSG_LENGTH, typePointer); }
+void receive_message(mqd_t desc, char *msgPointer, int *typePointer) { mq_receive(desc, msgPointer, MAX_MESSAGE_SIZE, typePointer); }
 
 void register_notification(mqd_t desc, struct sigevent *s) { mq_notify(desc, s); }
