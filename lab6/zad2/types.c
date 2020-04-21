@@ -1,56 +1,8 @@
 #include "types.h"
-void err(char *mess)
-{
-    perror(mess);
-    exit(0);
-}
-void close_queue(int queue)
-{
-    if (mq_close(queue) == -1)
-        err("Cant close");
-}
-void delete_queue(char *name)
-{
-    if (mq_unlink(name) == -1)
-        err("Cant delete");
-}
-int create_queue(char *name)
-{
-    struct mq_attr attr;
-    attr.mq_flags = 0;
-    attr.mq_maxmsg = 10;
-    attr.mq_msgsize = MAX_MESSAGE_LENGHT - 1;
-    attr.mq_curmsgs = 0;
 
-    return mq_open(name, O_RDONLY | O_CREAT | O_EXCL, 0666, &attr);
-}
-mqd_t get_queue(char *name)
-{
-    return mq_open(name, O_WRONLY);
-}
+int stringEq(char *str1, char *str2) { return strcmp(str1, str2) == 0; }
 
-void send_message(int queue, char mess[MAX_MESSAGE_LENGHT], int type)
-{
-    if (mq_send(queue, mess, strlen(mess), type) == -1)
-        err("Cant send message");
-}
-void receive_message(int queue, char *mess, int *type)
-{
-    if (mq_receive(queue, mess, MAX_MESSAGE_LENGHT, type) == -1)
-        err("Cant reveive message");
-}
-
-char *concat(const char *s1, const char *s2)
-{
-    int len = strlen(s1) + strlen(s2) + 1;
-    char *result = (char *)malloc(len);
-
-    strcpy(result, s1);
-    strcat(result, s2);
-
-    return result;
-}
-char *random_name(int length)
+char *randomString(int length)
 {
     char *str = calloc(length + 1, sizeof(char));
 
@@ -64,8 +16,43 @@ char *random_name(int length)
 
     return str;
 }
-void register_notif(int queue, struct sigevent *ev)
+
+char *concat(const char *s1, const char *s2)
 {
-    mq_notify(queue, ev);
+    int len = strlen(s1) + strlen(s2) + 1;
+    char *result = (char *)malloc(len);
+
+    strcpy(result, s1);
+    strcat(result, s2);
+
+    return result;
 }
-int equals(char *str1, char *str2) { return strcmp(str1, str2) == 0; }
+
+void printError()
+{
+    if (errno != 0)
+    {
+        fprintf(stderr, "Value of errno: %d\n", errno);
+        perror("Error printed by perror");
+    }
+}
+
+void DELETE_QUEUE(char *name) { mq_unlink(name); }
+void CLOSE_QUEUE(mqd_t descr) { mq_close(descr); }
+int CREATE_QUEUE(char *name)
+{
+    struct mq_attr attr;
+    attr.mq_flags = 0;
+    attr.mq_maxmsg = 10;
+    attr.mq_msgsize = MAX_MSG_LENGTH - 1;
+    attr.mq_curmsgs = 0;
+
+    return mq_open(name, O_RDONLY | O_CREAT | O_EXCL, 0666, &attr);
+}
+int GET_QUEUE(char *name) { return mq_open(name, O_WRONLY); }
+
+void SEND_MESSAGE(mqd_t desc, char *msgPointer, int type) { mq_send(desc, msgPointer, strlen(msgPointer), type); }
+
+void RECEIVE_MESSAGE(mqd_t desc, char *msgPointer, int *typePointer) { mq_receive(desc, msgPointer, MAX_MSG_LENGTH, typePointer); }
+
+void REGISTER_NOTIFICATION(mqd_t desc, struct sigevent *s) { mq_notify(desc, s); }

@@ -1,3 +1,4 @@
+#define TYPES_H
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/limits.h>
@@ -22,26 +23,34 @@
 #define CLIENT_CLIENT_MSG 4
 #define CLIENT_CLIENT_DICONNECT 5
 
-#define MAX_MESSAGE_LENGHT 256
+#define MAX_CLIENTS 32
+#define MAX_MSG_LENGTH 256
+
 #define PREFIX ("/queues-")
 #define SERVER_NAME (concat(PREFIX, "server"))
-#define CLIENT_RANDOM_NAME (concat(PREFIX, concat("client-", random_name(12))))
-typedef struct
+#define CLIENT_RANDOM_NAME \
+    (concat(PREFIX, concat("client-", randomString(12))))
+
+void DELETE_QUEUE(char *name);
+void CLOSE_QUEUE(mqd_t descr);
+int CREATE_QUEUE(char *name);
+int GET_QUEUE(char *name);
+
+void SEND_MESSAGE(mqd_t desc, char *msgPointer, int type);
+
+void RECEIVE_MESSAGE(mqd_t desc, char *msgPointer, int *typePointer);
+
+void REGISTER_NOTIFICATION(mqd_t desc, struct sigevent *s);
+
+void printError();
+int stringEq(char *str1, char *str2);
+char *randomString(int length);
+char *concat(const char *s1, const char *s2);
+
+struct Client
 {
-    int id;
-    int queue;
+    int clientId;
+    int queueDesc;
     char *name;
     int available;
-} Client;
-
-void err(char *mess);
-void close_queue(int queue);
-void delete_queue(char *name);
-int create_queue(char *name);
-mqd_t get_queue(char *name);
-void send_message(int queue, char mess[MAX_MESSAGE_LENGHT], int type);
-void receive_message(int queue, char *mess, int *type);
-char *concat(const char *s1, const char *s2);
-char *random_name(int length);
-void register_notif(int queue, struct sigevent *ev);
-int equals(char *str1, char *str2);
+} typedef Client;

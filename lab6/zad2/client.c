@@ -1,131 +1,264 @@
-#define _POSIX_C_SOURCE 199309L
 #include "types.h"
 #include <signal.h>
 
-int client_queue;
-int server_queue;
-int id;
+int clientQueueDesc;
+int serverQueueDesc;
+int clientId;
 char *name;
 
-int friend_queue;
-void handle_exit()
+// When chatting
+int chateeQueueDesc = -1;
+
+void exitClient()
 {
-    printf("Client exits\n");
-    close_queue(server_queue);
-    close_queue(client_queue);
-    delete_queue(name);
+    printf("Client -- exit..\n");
+    CLOSE_QUEUE(serverQueueDesc);
+    CLOSE_QUEUE(clientQueueDesc);
+
+    DELETE_QUEUE(name);
     exit(EXIT_SUCCESS);
 }
 
-void register_notifications()
+// SEND - INIT
+void registerMe()
+{
+    char csMsg[MAX_MSG_LENGTH];
+    sprintf(csMsg, "%d %s", CLIENT_SERVER_INIT, name);
+
+    SEND_MESSAGE(serverQueueDesc, csMsg, CLIENT_SERVER_INIT);
+
+    char scMsg[MAX_MSG_LENGTH];
+    unsigned int type;
+    RECEIVE_MESSAGE(clientQueueDesc, scMsg, &type);
+
+    sscanf(scMsg, "%d %d", &type, &clientId);
+    printf("Client -- registered with id: %d, key: %s\n", clientId, name);
+}
+// ----------------
+
+// SEND - STOP
+void sendStop()
+{
+    printf("Client -- sending STOP..\n");
+
+    char csMsg[MAX_MSG_LENGTH];
+    sprintf(csMsg, "%d %d", CLIENT_SERVER_STOP, clientId);
+    SEND_MESSAGE(serverQueueDesc, csMsg, CLIENT_SERVER_STOP);
+
+    exitClient();
+}
+
+void handleExitSignal(int sig) { sendStop(); }
+// ----------------
+
+// SEND - LIST
+void sendList()
+{
+    printf("Client -- sending LIST..\n");
+
+    char csMsg[MAX_MSG_LENGTH];
+    sprintf(csMsg, "%d %d", CLIENT_SERVER_LIST, clientId);
+    SEND_MESSAGE(serverQueueDesc, csMsg, CLIENT_SERVER_LIST);
+}
+// ----------------
+
+// SEND - DISCONNECT
+void sendDisconnect()
+{
+    printf("Client -- disconnected chat\n");
+
+    char csMsg[MAX_MSG_LENGTH];
+    sprintf(csMsg, "%d %d", CLIENT_SERVER_DISCONNECT, clientId);
+    SEND_MESSAGE(serverQueueDesc, csMsg, CLIENT_SERVER_DISCONNECT);
+
+    if (chateeQueueDesc != -1)
+    {
+        char ccMsg[MAX_MSG_LENGTH];
+        sprintf(csMsg, "%d %d", CLIENT_CLIENT_DICONNECT, clientId);
+        SEND_MESSAGE(chateeQueueDesc, ccMsg, CLIENT_CLIENT_DICONNECT);
+
+        CLOSE_QUEUE(chateeQueueDesc);
+        chateeQueueDesc = -1;
+    }
+}
+// ----------------
+
+// SEND - CONNECT
+void sendConnect(int chateeId)
+{
+    printf("Client -- seending CONNECT to chatee with ID: %d\n", chateeId);
+
+    char csMsg[MAX_MSG_LENGTH];
+    sprintf(csMsg, "%d %d %d", CLIENT_SERVER_CONNECT, clientId, chateeId);
+    SEND_MESSAGE(serverQueueDesc, csMsg, CLIENT_SERVER_CONNECT);
+}
+// ----------------
+
+// SEND - MSG
+void sendMessage(char *message)
+{
+    char ccMsg[MAX_MSG_LENGTH];
+    sprintf(ccMsg, "%d %s", CLIENT_CLIENT_MSG, message);
+
+    SEND_MESSAGE(chateeQueueDesc, ccMsg, CLIENT_CLIENT_MSG);
+    printf("------------------------------------------------\n");
+    printf("Me:          \t%s\n", message);
+    printf("------------------------------------------------\n");
+}
+// ----------------
+
+// HANDLE - DISCONNECT
+void handleDisconnect(char *msg)
+{
+    printf("Client -- received disconnect msg from chatee..\n");
+
+    chateeQueueDesc = -1;
+    CLOSE_QUEUE(chateeQueueDesc);
+    sendDisconnect();
+}
+// ----------------
+
+// Handle - CHAT_INIT
+void handleChatInit(char *msg)
+{
+    int chateeId;
+    unsigned int type;
+    char chateeName[MAX_MSG_LENGTH];
+    sscanf(msg, "%d %d %s", &type, &chateeId, chateeName);
+    printf("Client -- entering chat with %d..\n", chateeId);
+    chateeQueueDesc = GET_QUEUE(chateeName);
+}
+// ----------------
+
+// Handle - TERMINATE
+void handleTerminate()
+{
+    printf("Client -- Received terminate signal.. Server is wating for STOP..\n");
+}
+// ----------------
+
+// Handle - MSG
+void handleMessage(char *ccMsg)
+{
+    char msg[MAX_MSG_LENGTH];
+    unsigned int type;
+    sscanf(ccMsg, "%d %s", &type, msg);
+
+    printf("------------------------------------------------\n");
+    printf("Chatee says:\t%s\n", msg);
+    printf("------------------------------------------------\n");
+}
+// ----------------
+
+void registerNotification()
 {
     struct sigevent ev;
     ev.sigev_notify = SIGEV_SIGNAL;
     ev.sigev_signo = SIGUSR1;
 
-    register_notif(client_queue, &ev);
+    REGISTER_NOTIFICATION(clientQueueDesc, &ev);
 }
-void handle_signal(int signal)
+
+void handleSignal(int signal)
 {
-    //todo
-    char *msg = malloc(sizeof(char) * MAX_MESSAGE_LENGHT);
+
+    char *msg = malloc(sizeof(char) * MAX_MSG_LENGTH);
     unsigned int type;
-    receive_message(client_queue, msg, &type);
-    switch (type)
+
+    RECEIVE_MESSAGE(clientQueueDesc, msg, &type);
+    if (type == SERVER_CLIENT_CHAT_INIT)
     {
-    case SERVER_CLIENT_CHAT_INIT:
-        break;
-    case SERVER_CLIENT_TERMINATE:
-        break;
-    case CLIENT_CLIENT_MSG:
-        break;
-    case CLIENT_CLIENT_DICONNECT:
-        break;
-    default:
+        handleChatInit(msg);
+    }
+    else if (type == SERVER_CLIENT_TERMINATE)
+    {
+        handleTerminate();
+    }
+    else if (type == CLIENT_CLIENT_MSG)
+    {
+        handleMessage(msg);
+    }
+    else if (type == CLIENT_CLIENT_DICONNECT)
+    {
+        handleDisconnect(msg);
+    }
+    else
+    {
         printf("Client -- received message of unknown type..\n");
     }
+
     free(msg);
-    register_notifications();
+    registerNotification();
 }
 
-void register_me()
-{
-    char mess[MAX_MESSAGE_LENGHT];
-    sprintf(mess, "%d %s", CLIENT_SERVER_INIT, name);
-    send_message(server_queue, mess, CLIENT_SERVER_INIT);
-    char back[MAX_MESSAGE_LENGHT];
-    unsigned int type;
-    receive_message(client_queue, back, &type);
-    sscanf(back, "%d %d", &type, &id);
-    printf("Client -- registered with id: %d, key: %s\n", id, name);
-}
-
-void send_list()
-{
-    printf("Client -- LIST..\n");
-    char mess[MAX_MESSAGE_LENGHT];
-    sprintf(mess, "%d %d", CLIENT_SERVER_LIST, id);
-    send_message(server_queue, mess, CLIENT_SERVER_LIST);
-}
-
-void send_stop()
-{
-    printf("Client -- STOP..\n");
-
-    char mess[MAX_MESSAGE_LENGHT];
-    sprintf(mess, "%d %d", CLIENT_SERVER_STOP, id);
-    send_message(server_queue, mess, CLIENT_SERVER_STOP);
-
-    handle_exit();
-}
-void stop(int sig) { send_stop(); }
-int main()
+int main(int charc, char *argv[])
 {
     srand(time(NULL));
     name = CLIENT_RANDOM_NAME;
-    client_queue = create_queue(name);
-    if (client_queue == -1)
+    clientQueueDesc = CREATE_QUEUE(name);
+    // This is just in case our key was not unique.
+    if (clientQueueDesc == -1)
     {
-        err("Queue already exists");
+        printf("There already exists client associated with this queue...\n");
+        printError();
         return -1;
     }
-    server_queue = get_queue(SERVER_NAME);
-    if (server_queue == -1)
+
+    serverQueueDesc = GET_QUEUE(SERVER_NAME);
+    if (serverQueueDesc == -1)
     {
-        err("Cant open server queue");
-        return -1;
+        printf("Failed to open server queue\n");
+        printError();
     }
-    signal(SIGINT, stop);
-    signal(SIGUSR1, handle_signal);
-    register_me();
-    register_notifications();
-    char buffer[MAX_MESSAGE_LENGHT];
-    char message[MAX_MESSAGE_LENGHT];
+
+    signal(SIGINT, handleExitSignal);
+    signal(SIGUSR1, handleSignal);
+
+    registerMe();
+    registerNotification();
+
+    char buffer[MAX_MSG_LENGTH];
+    char message[MAX_MSG_LENGTH];
+
     while (1)
     {
+        // Client executes command.
         scanf("%s", buffer);
-        if (equals(buffer, "STOP"))
+        if (stringEq(buffer, "STOP"))
         {
-            send_stop();
+            sendStop();
         }
-        else if (equals(buffer, "LIST"))
+        else if (stringEq(buffer, "LIST"))
         {
-            send_list();
+            sendList();
         }
-        else if (equals(buffer, "DISCONNECT"))
+        else if (stringEq(buffer, "DISCONNECT"))
         {
-            //
+            sendDisconnect();
         }
-        else if (equals(buffer, "CONNECT"))
-        { //
-        }
-        else if (equals(buffer, "MESSAGE"))
+        else if (stringEq(buffer, "CONNECT"))
         {
-            //
+            int chateeId;
+
+            scanf("%d", &chateeId);
+            sendConnect(chateeId);
         }
-        else if (equals(buffer, "PASS"))
+        else if (stringEq(buffer, "SEND"))
         {
-            //
+            scanf("%s", message);
+
+            if (chateeQueueDesc == -1)
+            {
+                printf("Client -- unable to send message\n");
+            }
+            else
+            {
+                sendMessage(message);
+            }
+        }
+        else if (stringEq(buffer, "PASS"))
+        {
+            ;
         }
         else
         {

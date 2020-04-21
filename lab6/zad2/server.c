@@ -1,176 +1,232 @@
 #include "types.h"
 #include <signal.h>
 
-#define MAX_CLIENTS 128
-
 Client *clients[MAX_CLIENTS];
 
-int server_queue = -1;
-int clients_count = 0;
-int waiting = 0;
+int serverQueueDesc = -1;
+int clientsRunningCount = 0;
+int waitingForClientsToTerminate = 0;
 int current = 0;
 
-void on_exit_server()
+// HANDLE EXIT - CRTL+C
+void exitServer()
 {
-    printf("Server exits\n");
-    close_queue(server_queue);
-    delete_queue(SERVER_NAME);
+    printf("Server exits...\n");
+    CLOSE_QUEUE(serverQueueDesc);
+    DELETE_QUEUE(SERVER_NAME);
+
     exit(EXIT_SUCCESS);
 }
 
-void handle_exit(int sig)
+void handleSignalExit(int signal)
 {
-    char mess[MAX_MESSAGE_LENGHT];
-    sprintf(mess, "%d", SERVER_CLIENT_TERMINATE);
-    if (clients_count <= 0)
-        on_exit_server();
-    waiting = 1;
+    char msg[MAX_MSG_LENGTH];
+    sprintf(msg, "%d", SERVER_CLIENT_TERMINATE);
+
+    if (clientsRunningCount <= 0)
+        exitServer();
+
+    waitingForClientsToTerminate = 1;
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
         if (clients[i])
         {
-            send_message(clients[i]->queue, mess, SERVER_CLIENT_TERMINATE);
+            SEND_MESSAGE(clients[i]->queueDesc, msg, SERVER_CLIENT_TERMINATE);
         }
     }
+
     printf("Server -- waiting for clients to terminate.\n");
 }
+// -------------------------
 
-int get_client_id()
+// HANDLE - STOP
+void handleStop(char *msg)
 {
+    int type, clientId;
+    sscanf(msg, "%d %d", &type, &clientId);
+
+    clients[clientId] = NULL;
+    free(clients[clientId]);
+
+    clientsRunningCount -= 1;
+    printf("Server -- Received STOP from %d\n", clientId);
+
+    if (waitingForClientsToTerminate && clientsRunningCount <= 0)
+    {
+        exitServer();
+    }
+}
+// -------------------------
+
+// HANDLE - DISCONNECT
+void handleDisconnect(char *msg)
+{
+    int type, clientId;
+    sscanf(msg, "%d %d", &type, &clientId);
+
+    clients[clientId]->available = 1;
+    printf("Server -- client with id %d left chat and is now available..\n",
+           clientId);
+}
+// -------------------------
+
+// HANDLE - LIST
+void handleList(char *msg)
+{
+    int type, clientId;
+    sscanf(msg, "%d %d", &type, &clientId);
+
+    printf("Server -- listing available clients as requested by client with id "
+           "%d...\n",
+           clientId);
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
-        if (clients[i] == NULL)
-            return i;
-    }
-    return -1;
-}
-void handle_init(char *msg)
-{
-    int type;
-    char *name = malloc(MAX_MESSAGE_LENGHT * sizeof(char));
-    sscanf(msg, "%d %s", &type, name);
-    int pointer = get_client_id();
-    if (pointer == -1)
-    {
-        printf("Server reached max clients \n");
-        return;
-    }
-    Client *client = malloc(sizeof(Client));
-    client->available = 1;
-    client->name = name;
-    client->id = pointer;
-    client->queue = get_queue(name);
-    if (client->queue == -1)
-    {
-        err("Can't open client queue on init \n");
-    }
-    clients[pointer] = client;
-    char response[MAX_MESSAGE_LENGHT];
-    sprintf(response, "%d %d", SERVER_CLIENT_REGISTRED, pointer);
-    send_message(client->queue, response, SERVER_CLIENT_REGISTRED);
-    clients_count++;
-    printf("Server -- registered client - id: %d, path: %s\n", client->id,
-           client->name);
-}
-void handle_list(char *msg)
-{
-    int type, client_id;
-    sscanf(msg, "%d %d", &type, &client_id);
-    printf("Server -- listing clients\n");
-    for (int i = 0; i < MAX_CLIENTS; i++)
-    {
-        if (i == client_id)
+        if (i == clientId)
         {
-            printf("\tClient --> id - %d, name - %s (ME)\n", clients[i]->id,
+            printf("\tClient --> id - %d, path - %s (ME)\n", clients[i]->clientId,
                    clients[i]->name);
         }
         else if (clients[i] && clients[i]->available)
         {
-            printf("\tClient --> id - %d, name - %s is available\n", clients[i]->id,
-                   clients[i]->name);
-        }
-        else if (clients[i] && !clients[i]->available)
-        {
-            printf("\tClient --> id - %d, name - %s isn't available\n", clients[i]->id,
+            printf("\tClient --> id - %d, path - %s\n", clients[i]->clientId,
                    clients[i]->name);
         }
     }
 }
-void handle_stop(char *msg)
+// -------------------------
+
+// HANDLE - CONNECT
+void handleConnect(char *msg)
 {
-    int type, client_id;
-    sscanf(msg, "%d %d", &type, &client_id);
-    clients[client_id] = NULL;
-    free(clients[client_id]);
-    clients_count--;
-    printf("Server -- Received STOP\n");
-    if (waiting && clients_count <= 0)
+    int type, clientId, chateeId;
+    sscanf(msg, "%d %d %d", &type, &clientId, &chateeId);
+
+    int id1 = clientId;
+    int id2 = chateeId;
+
+    // Check if client under sent id is avaiable
+    if (id2 < 0 || id2 >= MAX_CLIENTS || !clients[id2] ||
+        !clients[id2]->available || id1 == id2)
     {
-        on_exit_server();
-    }
-}
-void handle_disconnect(char *msg)
-{
-    int type, client_id;
-    sscanf(msg, "%d %d", &type, &client_id);
-    clients[client_id]->available = 1;
-    printf("Server -- client with id %d is now available..\n",
-           client_id);
-}
-void handle_connect(char *msg)
-{
-    int type, id1, id2;
-    sscanf(msg, "%d %d %d", &type, &id1, &id2);
-    if (id2 < 0 || id2 >= MAX_CLIENTS || !clients[id2] || !clients[id2]->available || id1 == id2)
-    {
-        printf("Server -- cant connect\n");
+        printf("Server -- requested client is not avaiable\n");
         return;
     }
-    char msg1[MAX_MESSAGE_LENGHT];
-    char msg2[MAX_MESSAGE_LENGHT];
+    char msg1[MAX_MSG_LENGTH];
+    char msg2[MAX_MSG_LENGTH];
+
     sprintf(msg1, "%d %d %s", SERVER_CLIENT_CHAT_INIT, id2, clients[id2]->name);
     sprintf(msg2, "%d %d %s", SERVER_CLIENT_CHAT_INIT, id1, clients[id1]->name);
+
     clients[id1]->available = 0;
     clients[id2]->available = 0;
-    send_message(clients[id1]->queue, msg1, SERVER_CLIENT_CHAT_INIT);
-    send_message(clients[id2]->queue, msg2, SERVER_CLIENT_CHAT_INIT);
+
+    SEND_MESSAGE(clients[id1]->queueDesc, msg1, SERVER_CLIENT_CHAT_INIT);
+    SEND_MESSAGE(clients[id2]->queueDesc, msg2, SERVER_CLIENT_CHAT_INIT);
+
     printf("Server -- initialized chat, %d <=> %d\n", id1, id2);
 }
-void handle_message()
-{
-    char *msg = malloc(sizeof(char) * MAX_MESSAGE_LENGHT);
-    unsigned int type;
-    receive_message(server_queue, msg, &type);
-    switch (type)
-    {
-    case CLIENT_SERVER_STOP:
-        handle_stop(msg);
-        break;
-    case CLIENT_SERVER_DISCONNECT:
-        handle_disconnect(msg);
-        break;
-    case CLIENT_SERVER_LIST:
-        handle_list(msg);
-        break;
-    case CLIENT_SERVER_CONNECT:
-        break;
-    case CLIENT_SERVER_INIT:
-        handle_init(msg);
-        break;
+// -------------------------
 
-    default:
-        printf("Unknow command");
+// HANDLE - INIT
+void handleInit(char *msg)
+{
+    int type;
+    char *name = malloc(MAX_MSG_LENGTH * sizeof(char));
+    sscanf(msg, "%d %s", &type, name);
+
+    int pointer = -1;
+    for (int i = 0; i < MAX_CLIENTS; i++)
+    {
+        pointer = (current + i) % MAX_CLIENTS;
+        if (!clients[pointer])
+        {
+            break;
+        }
     }
+
+    if (pointer == -1)
+    {
+        printf("Server -- reached maximum capcity, cannot add another client...\n");
+    }
+    else
+    {
+        Client *client = malloc(sizeof(Client));
+        client->available = 1;
+        client->name = name;
+        client->clientId = pointer;
+        client->queueDesc = GET_QUEUE(name);
+
+        if (client->queueDesc == -1)
+        {
+            printError();
+            printf("Faile to open client's queue\n");
+        }
+
+        clients[pointer] = client;
+
+        // Notify client that he's now registered.
+        char scMsg[MAX_MSG_LENGTH];
+        sprintf(scMsg, "%d %d", SERVER_CLIENT_REGISTRED, pointer);
+
+        SEND_MESSAGE(client->queueDesc, scMsg, SERVER_CLIENT_REGISTRED);
+        clientsRunningCount += 1;
+        printf("Server -- registered client - id: %d, path: %s\n", client->clientId,
+               client->name);
+    }
+}
+// -------------------------
+
+// RECEIVE MESSAGE
+// Note that we handle messages in order based on priority.
+void handleMessage()
+{
+    char *msg = malloc(sizeof(char) * MAX_MSG_LENGTH);
+    unsigned int type;
+    RECEIVE_MESSAGE(serverQueueDesc, msg, &type);
+
+    if (type == CLIENT_SERVER_STOP)
+    {
+        handleStop(msg);
+    }
+    else if (type == CLIENT_SERVER_DISCONNECT)
+    {
+        handleDisconnect(msg);
+    }
+    else if (type == CLIENT_SERVER_LIST)
+    {
+        handleList(msg);
+    }
+    else if (type == CLIENT_SERVER_CONNECT)
+    {
+        handleConnect(msg);
+    }
+    else if (type == CLIENT_SERVER_INIT)
+    {
+        handleInit(msg);
+    }
+    else
+    {
+        printf("Unknown type\n");
+    }
+
     free(msg);
 }
-int main()
+
+int main(int argc, char *arrgv[])
 {
-    server_queue = create_queue(SERVER_NAME);
-    if (server_queue == -1)
-        err("Cant create queue for server");
-    printf("Running server... \n");
-    signal(SIGINT, handle_exit);
+    serverQueueDesc = CREATE_QUEUE(SERVER_NAME);
+    if (serverQueueDesc == -1)
+    {
+        printf("failed to open\n");
+        printError();
+    }
+    signal(SIGINT, handleSignalExit);
+
+    printf("Server running...\n");
     while (1)
-        handle_message();
+    {
+        handleMessage();
+    }
+
     return 0;
 }

@@ -1,5 +1,8 @@
+CC = gcc -Wall 
+
 all:
-	gcc -o server server.c types.c -lrt
-	gcc -o client client.c types.c -lrt
+	gcc server.c types.c -o server -lrt
+	gcc client.c types.c -o client -lrt
+
 clean:
-	rm -f client server
+	rm -f client server *.o 
