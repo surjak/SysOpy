@@ -28,6 +28,7 @@ void clear()
 {
     semctl(sem_id, 0, IPC_RMID, NULL);
     shmctl(shm_id, IPC_RMID, NULL);
+    system("make clean");
 }
 
 void sigint_handle(int signum)
