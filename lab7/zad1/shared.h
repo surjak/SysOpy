@@ -26,7 +26,7 @@ typedef struct
 
 #define rand_time ((rand() % (max_sleep - min_sleep + 1) + min_sleep) * 1000)
 
-int get_semafore();
+int get_semaphore();
 int get_shared_memory();
 
 #endif //SHARED_H

@@ -25,16 +25,16 @@ union semun {
 
 pid_t pids[W_1 + W_2 + W_3];
 
-int semafore_id;
+int semaphore_id;
 int shared_memory_id;
 
-void set_semafore()
+void set_semaphore()
 {
     key_t sem_key = ftok(getenv("HOME"), 0);
-    semafore_id = semget(sem_key, 6, IPC_CREAT | 0666);
-    if (semafore_id < 0)
+    semaphore_id = semget(sem_key, 6, IPC_CREAT | 0666);
+    if (semaphore_id < 0)
     {
-        printf("Cannot create semafors set %d\n", errno);
+        printf("Cannot create semaphores set %d\n", errno);
         exit(EXIT_FAILURE);
     }
     union semun arg;
@@ -42,7 +42,7 @@ void set_semafore()
 
     for (int i = 0; i < 6; i++)
     {
-        semctl(semafore_id, i, SETVAL, arg);
+        semctl(semaphore_id, i, SETVAL, arg);
     }
 }
 
@@ -59,7 +59,7 @@ void create_shared_memory()
 
 void clear()
 {
-    semctl(semafore_id, 0, IPC_RMID, NULL);
+    semctl(semaphore_id, 0, IPC_RMID, NULL);
     shmctl(shared_memory_id, IPC_RMID, NULL);
     system("make clean");
 }
@@ -114,7 +114,7 @@ void run_workers()
 int main()
 {
     signal(SIGINT, handle_SIGINT);
-    set_semafore();
+    set_semaphore();
     create_shared_memory();
     run_workers();
     clear();

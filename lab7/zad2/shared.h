@@ -17,6 +17,10 @@
 #define max_sleep 1000
 #define MIN_VAL 1
 #define MAX_VAL 100
+#define SHARED_MEMORY "/SHARED_MEMORY"
+int shared_memory_descriptor;
+const char *SEMAPHORES[6] = {"/TOGGLER", "/INDEX", "/ORDER_INDEX", "/ORDERS_TO_PREPARE", "/SEND_INDEX", "/ORDERS_TO_SEND"};
+sem_t *semaphores[6];
 typedef struct
 {
     int values[MAX_ORDERS];

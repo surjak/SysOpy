@@ -1,15 +1,15 @@
 #include "shared.h"
 
-int get_semafore()
+int get_semaphore()
 {
     key_t sem_key = ftok(getenv("HOME"), 0);
-    int semafore_id = semget(sem_key, 0, 0);
-    if (semafore_id < 0)
+    int semaphore_id = semget(sem_key, 0, 0);
+    if (semaphore_id < 0)
     {
-        printf("Can't get semafor %d\n", errno);
+        printf("Can't get semaphore %d\n", errno);
         exit(EXIT_FAILURE);
     }
-    return semafore_id;
+    return semaphore_id;
 }
 
 int get_shared_memory()

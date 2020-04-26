@@ -12,7 +12,7 @@
 
 #include "shared.h"
 
-int semafore_id;
+int semaphore_id;
 int shared_memory_id;
 
 typedef struct sembuf sembuf;
@@ -32,14 +32,14 @@ void add_order()
     load[2].sem_op = 1;
     load[2].sem_flg = 0;
 
-    semop(semafore_id, load, 3);
+    semop(semaphore_id, load, 3);
 
     orders *ord = shmat(shared_memory_id, NULL, 0);
-    int index = (semctl(semafore_id, 1, GETVAL, NULL) - 1) % MAX_ORDERS;
+    int index = (semctl(semaphore_id, 1, GETVAL, NULL) - 1) % MAX_ORDERS;
     int value = rand_int;
     ord->values[index] = value;
-    int orders_to_prepare = semctl(semafore_id, 3, GETVAL, NULL) + 1;
-    int orders_to_send = semctl(semafore_id, 5, GETVAL, NULL);
+    int orders_to_prepare = semctl(semaphore_id, 3, GETVAL, NULL) + 1;
+    int orders_to_send = semctl(semaphore_id, 5, GETVAL, NULL);
     printf("[%d %ld] Dodalem liczbe: %d. Liczba zamowien do przygotowania: %d. Liczba zamowien do wyslania: %d.\n",
            getpid(), time(NULL), value, orders_to_prepare, orders_to_send);
 
@@ -55,20 +55,20 @@ void add_order()
     back[1].sem_op = 1;
     back[1].sem_flg = 0;
 
-    semop(semafore_id, back, 2);
+    semop(semaphore_id, back, 2);
 }
 
 int main()
 {
     srand(time(NULL));
 
-    semafore_id = get_semafore();
+    semaphore_id = get_semaphore();
     shared_memory_id = get_shared_memory();
 
     while (1)
     {
         usleep(rand_time);
-        if (semctl(semafore_id, 3, GETVAL, NULL) + semctl(semafore_id, 5, GETVAL, NULL) < MAX_ORDERS)
+        if (semctl(semaphore_id, 3, GETVAL, NULL) + semctl(semaphore_id, 5, GETVAL, NULL) < MAX_ORDERS)
         {
             add_order();
         }
