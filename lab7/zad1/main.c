@@ -12,6 +12,10 @@
 
 #include "shared.h"
 
+#define W_1 3
+#define W_2 3
+#define W_3 3
+
 union semun {
     int val;
     struct semid_ds *buf;
@@ -19,55 +23,59 @@ union semun {
     struct seminfo *__buf;
 };
 
-pid_t child_pids[W_1 + W_2 + W_3];
+pid_t pids[W_1 + W_2 + W_3];
 
-int sem_id;
-int shm_id;
+int semafore_id;
+int shared_memory_id;
 
-void clear()
+void set_semafore()
 {
-    semctl(sem_id, 0, IPC_RMID, NULL);
-    shmctl(shm_id, IPC_RMID, NULL);
-    system("make clean");
-}
-
-void sigint_handle(int signum)
-{
-    printf("Konczenie dzialania...\n");
-    for (int i = 0; i < W_1 + W_2 + W_3; i++)
-    {
-        kill(child_pids[i], SIGINT);
-    }
-    clear();
-    exit(0);
-}
-
-int main()
-{
-    printf("HELLO");
-    signal(SIGINT, sigint_handle);
     key_t sem_key = ftok(getenv("HOME"), 0);
-    sem_id = semget(sem_key, 6, IPC_CREAT | 0666);
-    if (sem_id < 0)
+    semafore_id = semget(sem_key, 6, IPC_CREAT | 0666);
+    if (semafore_id < 0)
     {
         printf("Cannot create semafors set %d\n", errno);
         exit(EXIT_FAILURE);
     }
-
     union semun arg;
     arg.val = 0;
 
     for (int i = 0; i < 6; i++)
     {
-        semctl(sem_id, i, SETVAL, arg);
+        semctl(semafore_id, i, SETVAL, arg);
     }
+}
+
+void create_shared_memory()
+{
     key_t shm_key = ftok(getenv("HOME"), 1);
-    shm_id = shmget(shm_key, sizeof(orders), IPC_CREAT | 0666);
-    if (shm_id < 0)
+    shared_memory_id = shmget(shm_key, sizeof(orders), IPC_CREAT | 0666);
+    if (shared_memory_id < 0)
     {
         printf("Cannot create shared memory %d\n", errno);
         exit(EXIT_FAILURE);
     }
+}
+
+void clear()
+{
+    semctl(semafore_id, 0, IPC_RMID, NULL);
+    shmctl(shared_memory_id, IPC_RMID, NULL);
+    system("make clean");
+}
+
+void handle_SIGINT(int signum)
+{
+    for (int i = 0; i < W_1 + W_2 + W_3; i++)
+    {
+        kill(pids[i], SIGINT);
+    }
+    clear();
+    exit(0);
+}
+
+void run_workers()
+{
     for (int i = 0; i < W_1; i++)
     {
         pid_t child_pid = fork();
@@ -75,7 +83,7 @@ int main()
         {
             execlp("./worker_1", "worker_1", NULL);
         }
-        child_pids[i] = child_pid;
+        pids[i] = child_pid;
     }
 
     for (int i = 0; i < W_2; i++)
@@ -85,7 +93,7 @@ int main()
         {
             execlp("./worker_2", "worker_2", NULL);
         }
-        child_pids[i + W_1] = child_pid;
+        pids[i + W_1] = child_pid;
     }
 
     for (int i = 0; i < W_3; i++)
@@ -95,13 +103,20 @@ int main()
         {
             execlp("./worker_3", "worker_3", NULL);
         }
-        child_pids[i + W_1 + W_2] = child_pid;
+        pids[i + W_1 + W_2] = child_pid;
     }
     for (int i = 0; i < W_1 + W_2 + W_3; i++)
     {
         wait(NULL);
     }
+}
 
+int main()
+{
+    signal(SIGINT, handle_SIGINT);
+    set_semafore();
+    create_shared_memory();
+    run_workers();
     clear();
     return 0;
 }
