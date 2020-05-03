@@ -13,8 +13,8 @@ prog1 arg1 ... argn1 | prog2 arg1 ... argn2 | ... | progN arg1 ... argnN
   
 Program należy zaimplementować w dwóch wariantach:  
 - Korzystając z funkcji pipe/fork/exec (50%)  
-- Korzystając z popen (10%)  
-##Zadanie 2 (10%)
+- Korzystając z popen (dodatkowo)  
+## Zadanie 2 (10%)
 Napisać program przyjmujący jeden argument - ścieżkę do pliku tekstowego zawierających kilka linii tekstu (dowolne znaki). Wykorzystując popen oraz komendę sort posortować linie podanego pliku tekstowego (posortowane linie mają być wypisane na ekran).
 ## Zadanie 3 (40%)
 W problemie producenta i konsumenta występują dwa rodzaje procesów, które dzielą wspólny bufor dla produkowanych i konsumowanych   jednostek. Zadaniem producenta jest wytworzenie surowca, umieszczenie go w buforze i rozpoczęcie pracy od nowa. Konsument pobiera   surowiec z bufora i wykorzystuje go.  
