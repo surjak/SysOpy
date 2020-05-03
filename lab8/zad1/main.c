@@ -10,7 +10,7 @@
 int W;
 int H;
 int **image;
-int MAX_LINE_LENGTH = 128;
+
 int threads;
 int **histogram;
 struct arg_struct
@@ -48,6 +48,7 @@ void load_image_to_array(char *filename)
         fprintf(stderr, "Cant open file \n");
         exit(EXIT_FAILURE);
     }
+    int MAX_LINE_LENGTH = 128;
     char buffer[MAX_LINE_LENGTH + 1];
     // skip header
     fgets(buffer, MAX_LINE_LENGTH, f);
@@ -175,7 +176,11 @@ int main(int argc, char *argv[])
     char *mode = argv[2];
     char *input_file = argv[3];
     char *output_file = argv[4];
+    char buffer[256];
     load_image_to_array(input_file);
+
+    FILE *txt = fopen("Times.txt", "a");
+    fprintf(txt, "Mode: %s | threads: %d\n", mode, threads);
 
     histogram = calloc(threads, sizeof(int *));
     for (int i = 0; i < threads; i++)
@@ -202,11 +207,14 @@ int main(int argc, char *argv[])
         double *y;
         pthread_join(thread_ids[i], (void *)&y);
         printf("Thread %d ------- %lf microseconds\n", i, *y);
+        fprintf(txt, "Thread %d ------- %lf microseconds\n", i, *y);
     }
 
     clock_gettime(CLOCK_REALTIME, &end);
     double time = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000.0;
     printf("\nFULL TIME: %f\n", time);
+    fprintf(txt, "FULL TIME: %f\n\n", time);
+
     save_histogram(output_file);
 
     // clean
@@ -216,5 +224,6 @@ int main(int argc, char *argv[])
     for (int i = 0; i < threads; i++)
         free(histogram[i]);
     free(histogram);
+    fclose(txt);
     return 0;
 }
