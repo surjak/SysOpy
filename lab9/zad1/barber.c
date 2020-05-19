@@ -43,7 +43,7 @@ void *barber()
         }
         printf("Golibroda: czeka %d klientow, gole klienta %ld\n", count_of_chairs - free_chairs, current_client);
         pthread_mutex_unlock(&mutex);
-        sleep((rand() % 3 + 1) * 3);
+        sleep((rand() % 3 + 1));
         pthread_mutex_lock(&mutex);
         clients_served++;
         if (clients_served == count_of_clients)

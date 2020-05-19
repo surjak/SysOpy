@@ -1,162 +1,81 @@
 Mode: sign | threads: 1
-Thread 0 ------- 538.504000 microseconds
-FULL TIME: 630.394000
+Thread 0 ------- 520.606000 microseconds
+FULL TIME: 662.244000
 
 Mode: sign | threads: 2
-Thread 0 ------- 553.049000 microseconds
-Thread 1 ------- 403.774000 microseconds
-FULL TIME: 674.058000
+Thread 0 ------- 518.316000 microseconds
+Thread 1 ------- 389.987000 microseconds
+FULL TIME: 650.116000
 
 Mode: sign | threads: 4
-Thread 0 ------- 894.877000 microseconds
-Thread 1 ------- 793.692000 microseconds
-Thread 2 ------- 408.863000 microseconds
-Thread 3 ------- 373.946000 microseconds
-FULL TIME: 1059.673000
+Thread 0 ------- 552.201000 microseconds
+Thread 1 ------- 763.285000 microseconds
+Thread 2 ------- 427.822000 microseconds
+Thread 3 ------- 662.846000 microseconds
+FULL TIME: 869.432000
 
 Mode: sign | threads: 8
-Thread 0 ------- 820.375000 microseconds
-Thread 1 ------- 778.544000 microseconds
-Thread 2 ------- 650.511000 microseconds
-Thread 3 ------- 536.078000 microseconds
-Thread 4 ------- 701.426000 microseconds
-Thread 5 ------- 675.973000 microseconds
-Thread 6 ------- 448.302000 microseconds
-Thread 7 ------- 615.522000 microseconds
-FULL TIME: 1179.731000
+Thread 0 ------- 831.349000 microseconds
+Thread 1 ------- 782.672000 microseconds
+Thread 2 ------- 765.845000 microseconds
+Thread 3 ------- 691.649000 microseconds
+Thread 4 ------- 692.063000 microseconds
+Thread 5 ------- 583.054000 microseconds
+Thread 6 ------- 375.985000 microseconds
+Thread 7 ------- 365.133000 microseconds
+FULL TIME: 1483.973000
 
 Mode: block | threads: 1
-Thread 0 ------- 381.681000 microseconds
-FULL TIME: 541.316000
+Thread 0 ------- 440.534000 microseconds
+FULL TIME: 581.717000
 
 Mode: block | threads: 2
-Thread 0 ------- 244.028000 microseconds
-Thread 1 ------- 356.641000 microseconds
-FULL TIME: 505.569000
+Thread 0 ------- 239.109000 microseconds
+Thread 1 ------- 332.799000 microseconds
+FULL TIME: 428.167000
 
 Mode: block | threads: 4
-Thread 0 ------- 167.315000 microseconds
-Thread 1 ------- 182.425000 microseconds
-Thread 2 ------- 147.024000 microseconds
-Thread 3 ------- 163.791000 microseconds
-FULL TIME: 322.434000
+Thread 0 ------- 127.941000 microseconds
+Thread 1 ------- 179.491000 microseconds
+Thread 2 ------- 104.473000 microseconds
+Thread 3 ------- 128.023000 microseconds
+FULL TIME: 470.792000
 
 Mode: block | threads: 8
-Thread 0 ------- 116.908000 microseconds
-Thread 1 ------- 94.773000 microseconds
-Thread 2 ------- 98.739000 microseconds
-Thread 3 ------- 96.158000 microseconds
-Thread 4 ------- 88.160000 microseconds
-Thread 5 ------- 85.346000 microseconds
-Thread 6 ------- 47.538000 microseconds
-Thread 7 ------- 60.784000 microseconds
-FULL TIME: 401.538000
+Thread 0 ------- 108.274000 microseconds
+Thread 1 ------- 88.272000 microseconds
+Thread 2 ------- 87.971000 microseconds
+Thread 3 ------- 92.457000 microseconds
+Thread 4 ------- 84.929000 microseconds
+Thread 5 ------- 80.510000 microseconds
+Thread 6 ------- 43.981000 microseconds
+Thread 7 ------- 54.918000 microseconds
+FULL TIME: 427.612000
 
 Mode: interleaved | threads: 1
-Thread 0 ------- 306.955000 microseconds
-FULL TIME: 448.516000
+Thread 0 ------- 451.187000 microseconds
+FULL TIME: 629.255000
 
 Mode: interleaved | threads: 2
-Thread 0 ------- 400.549000 microseconds
-Thread 1 ------- 350.842000 microseconds
-FULL TIME: 885.401000
+Thread 0 ------- 241.309000 microseconds
+Thread 1 ------- 241.586000 microseconds
+FULL TIME: 386.385000
 
 Mode: interleaved | threads: 4
-Thread 0 ------- 216.677000 microseconds
-Thread 1 ------- 228.293000 microseconds
-Thread 2 ------- 209.069000 microseconds
-Thread 3 ------- 194.217000 microseconds
-FULL TIME: 405.722000
+Thread 0 ------- 179.320000 microseconds
+Thread 1 ------- 162.143000 microseconds
+Thread 2 ------- 121.290000 microseconds
+Thread 3 ------- 148.591000 microseconds
+FULL TIME: 386.867000
 
 Mode: interleaved | threads: 8
-Thread 0 ------- 100.262000 microseconds
-Thread 1 ------- 88.477000 microseconds
-Thread 2 ------- 71.511000 microseconds
-Thread 3 ------- 83.919000 microseconds
-Thread 4 ------- 77.854000 microseconds
-Thread 5 ------- 79.465000 microseconds
-Thread 6 ------- 79.714000 microseconds
-Thread 7 ------- 86.063000 microseconds
-FULL TIME: 368.263000
-
-Mode: sign | threads: 1
-Thread 0 ------- 522.706000 microseconds
-FULL TIME: 673.282000
-
-Mode: sign | threads: 2
-Thread 0 ------- 567.305000 microseconds
-Thread 1 ------- 396.845000 microseconds
-FULL TIME: 669.160000
-
-Mode: sign | threads: 4
-Thread 0 ------- 760.113000 microseconds
-Thread 1 ------- 703.283000 microseconds
-Thread 2 ------- 746.940000 microseconds
-Thread 3 ------- 704.982000 microseconds
-FULL TIME: 989.772000
-
-Mode: sign | threads: 8
-Thread 0 ------- 900.676000 microseconds
-Thread 1 ------- 795.962000 microseconds
-Thread 2 ------- 795.578000 microseconds
-Thread 3 ------- 745.661000 microseconds
-Thread 4 ------- 725.884000 microseconds
-Thread 5 ------- 697.597000 microseconds
-Thread 6 ------- 660.354000 microseconds
-Thread 7 ------- 652.785000 microseconds
-FULL TIME: 1685.842000
-
-Mode: block | threads: 1
-Thread 0 ------- 439.169000 microseconds
-FULL TIME: 626.503000
-
-Mode: block | threads: 2
-Thread 0 ------- 326.980000 microseconds
-Thread 1 ------- 251.717000 microseconds
-FULL TIME: 422.405000
-
-Mode: block | threads: 4
-Thread 0 ------- 131.778000 microseconds
-Thread 1 ------- 124.740000 microseconds
-Thread 2 ------- 127.636000 microseconds
-Thread 3 ------- 132.552000 microseconds
-FULL TIME: 306.650000
-
-Mode: block | threads: 8
-Thread 0 ------- 65.630000 microseconds
-Thread 1 ------- 79.643000 microseconds
-Thread 2 ------- 80.442000 microseconds
-Thread 3 ------- 61.403000 microseconds
-Thread 4 ------- 85.305000 microseconds
-Thread 5 ------- 45.989000 microseconds
-Thread 6 ------- 80.145000 microseconds
-Thread 7 ------- 52.880000 microseconds
-FULL TIME: 315.457000
-
-Mode: interleaved | threads: 1
-Thread 0 ------- 476.266000 microseconds
-FULL TIME: 664.311000
-
-Mode: interleaved | threads: 2
-Thread 0 ------- 270.226000 microseconds
-Thread 1 ------- 244.877000 microseconds
-FULL TIME: 472.574000
-
-Mode: interleaved | threads: 4
-Thread 0 ------- 153.138000 microseconds
-Thread 1 ------- 116.779000 microseconds
-Thread 2 ------- 115.463000 microseconds
-Thread 3 ------- 112.969000 microseconds
-FULL TIME: 297.183000
-
-Mode: interleaved | threads: 8
-Thread 0 ------- 149.399000 microseconds
-Thread 1 ------- 136.430000 microseconds
-Thread 2 ------- 132.186000 microseconds
-Thread 3 ------- 77.944000 microseconds
-Thread 4 ------- 93.220000 microseconds
-Thread 5 ------- 70.939000 microseconds
-Thread 6 ------- 78.892000 microseconds
-Thread 7 ------- 76.434000 microseconds
-FULL TIME: 544.997000
+Thread 0 ------- 119.460000 microseconds
+Thread 1 ------- 104.503000 microseconds
+Thread 2 ------- 85.208000 microseconds
+Thread 3 ------- 102.868000 microseconds
+Thread 4 ------- 92.331000 microseconds
+Thread 5 ------- 78.299000 microseconds
+Thread 6 ------- 58.163000 microseconds
+Thread 7 ------- 50.207000 microseconds
+FULL TIME: 428.144000
 

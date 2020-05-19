@@ -1,6 +1,6 @@
 all:
 	make clean
 	gcc -o main barber.c -lpthread -lm
-	./main 3 10
+	./main 5 5
 clean:
 	rm -f main
